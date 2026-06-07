@@ -277,12 +277,12 @@ tr:hover td{background:var(--surface2)}
     <div class="lfield"><label>Password</label><input id="lPass" type="password" placeholder="Enter password"></div>
     <div class="login-err" id="loginErr">Invalid username or password</div>
     <button class="btn-login" onclick="doLogin()">Sign in</button>
-    <div class="demo-hint">
+    <!-- <div class="demo-hint">
       <strong>Demo accounts:</strong><br>
       admin / admin123 (superuser)<br>
       sarah / pass123 (sales rep)<br>
       james / pass123 (sales rep)
-    </div>
+    </div> -->
   </div>
 </div>
 
@@ -415,7 +415,7 @@ tr:hover td{background:var(--surface2)}
             <div class="field">
               <label>Type</label>
               <select id="cfType" onchange="updateCFTypeHint()">
-                <option value="expense">Expense / Money sent to manager</option>
+                <option value="expense">Expense / Money extracted</option>
                 <option value="income">Income / Money injected</option>
                 <option value="ecocash_in">EcoCash received (as change)</option>
                 <option value="ecocash_out">EcoCash paid out</option>

@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#21141d;--surface:#181c27;--surface2:#1e2235;--surface3:#252a3d;
+--accent:#c800b7;--accent2:#00a87e;--accent-dim:rgba(200,0,183,.12);
+--red:#ff5b5b;--red-dim:rgba(255,91,91,.12);
+--amber:#ffb547;--amber-dim:rgba(255,181,71,.12);
+--blue:#4f9cf9;--blue-dim:rgba(79,156,249,.12);
+--green:#00c896;--green-dim:rgba(0,200,150,.12);
+--text:#e8eaf0;--text2:#ffffff;--text3:#c1c1c1;
+--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
+--radius:10px;--radius-lg:14px;--radius-xl:18px;
+font-family:'DM Sans',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
+input,select,button{font-family:'DM Sans',sans-serif}
+
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
+.login-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-xl);padding:2.5rem;width:100%;max-width:550px}
+.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:2rem}
+.login-logo-icon{width:60px;height:60px;background:var(--accent);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:22px}
+.login-logo-text{font-size:50px;font-weight:600;color:var(--text)}
+.login-logo-sub{font-size:25px;color:var(--text2)}
+.login-title{font-size:22px;font-weight:600;margin-bottom:.4rem}
+.login-sub{font-size:18px;color:var(--text2);margin-bottom:1.8rem}
+.lfield{margin-bottom:1rem}
+.lfield label{display:block;font-size:16px;color:var(--text2);margin-bottom:6px;font-weight:500}
+.lfield input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 14px;color:var(--text);font-size:14px}
+.lfield input:focus{outline:none;border-color:var(--accent)}
+.btn-login{width:100%;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:12px;font-size:14px;font-weight:600;cursor:pointer;margin-top:.5rem;transition:opacity .15s}
+.btn-login:hover{opacity:.88}
+.login-err{color:var(--red);font-size:12px;margin-top:.5rem;display:none}
+.demo-hint{margin-top:1.2rem;padding:12px 14px;background:var(--surface2);border-radius:var(--radius);font-size:12px;color:var(--text2)}
+.demo-hint strong{color:var(--text);font-weight:500}
+
+#appScreen{display:none;min-height:100vh;flex-direction:column}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.8rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.tb-icon{width:40px;height:40px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.tb-title{font-size:30px;font-weight:600}
+.tb-date{font-size:16px;color:var(--text2);font-family:'DM Mono',monospace}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.user-chip{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px 5px 6px}
+.user-avatar{width:24px;height:24px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--accent)}
+.user-name{font-size:16px;font-weight:600}
+.user-role{font-size:14px;color:var(--text3)}
+.btn-logout{background:transparent;border:1px solid var(--border2);border-radius:var(--radius);padding:5px 10px;font-size:15px;color:var(--text2);cursor:pointer}
+.btn-logout:hover{border-color:var(--red);color:var(--red)}
+
+.layout{display:flex;flex:1}
+.sidebar{width:195px;background:var(--surface);border-right:1px solid var(--border);padding:1rem .75rem;flex-shrink:0;overflow-y:auto}
+.nav-label{font-size:20px;color:var(--text3);font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:0 8px;margin:1rem 0 .4rem}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius);cursor:pointer;color:var(--text2);font-size:18px;font-weight:500;margin-bottom:2px;transition:all .15s;border:1px solid transparent}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(200,0,183,.2)}
+.nav-item i{font-size:16px;width:18px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;font-family:'DM Mono',monospace}
+
+.main{flex:1;padding:1.5rem;overflow-y:auto}
+.panel{display:none}.panel.active{display:block}
+
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:1.5rem}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px}
+.metric-label{font-size:14px;color:var(--text3);margin-bottom:8px;font-weight:500}
+.metric-val{font-size:22px;font-weight:600;color:var(--text)}
+.metric-val.green{color:var(--green)}
+.metric-val.red{color:var(--red)}
+.metric-val.amber{color:var(--amber)}
+.metric-val.blue{color:var(--blue)}
+.metric-val.accent{color:var(--accent)}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1rem}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem}
+.card-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em}
+
+.form-row{display:grid;gap:10px;margin-bottom:20px}
+.fr2{grid-template-columns:1fr 1fr}
+.fr3{grid-template-columns:2fr 1fr 1fr}
+.fr4{grid-template-columns:2fr 1fr 1fr 1fr}
+.field{display:flex;flex-direction:column;gap:5px;position:relative}
+.field label{font-size:18px;color:var(--text2);font-weight:500}
+.field input,.field select{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:9px 12px;color:var(--text);font-size:13px}
+.field input:focus,.field select:focus{outline:none;border-color:var(--accent)}
+.field select option{background:var(--surface2)}
+
+/* AUTOCOMPLETE DROPDOWN */
+.autocomplete-list{position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);z-index:50;max-height:200px;overflow-y:auto;margin-top:2px;display:none}
+.autocomplete-list.show{display:block}
+.autocomplete-item{padding:9px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border)}
+.autocomplete-item:last-child{border-bottom:none}
+.autocomplete-item:hover,.autocomplete-item.selected{background:var(--surface2)}
+.autocomplete-item .ac-name{font-weight:500;color:var(--text)}
+.autocomplete-item .ac-meta{font-size:11px;color:var(--text3);margin-top:2px}
+
+.profit-strip{background:var(--accent-dim);border:1px solid rgba(200,0,183,.2);border-radius:var(--radius);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.ps-label{font-size:12px;color:var(--text2)}
+.ps-val{font-size:19px;font-weight:600;color:var(--accent)}
+.ps-val.neg{color:var(--red)}
+
+.btn-primary{background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:11px;font-size:13px;font-weight:600;cursor:pointer;width:100%;transition:opacity .15s}
+.btn-primary:hover{opacity:.88}
+.btn-sm{font-size:12px;padding:5px 10px;border:1px solid var(--border2);background:transparent;border-radius:8px;cursor:pointer;color:var(--text2);transition:all .15s}
+.btn-sm:hover{background:var(--surface2);color:var(--text)}
+.btn-sm.danger{border-color:rgba(255,91,91,.3);color:var(--red)}
+.btn-sm.success{background:var(--green-dim);border-color:rgba(0,200,150,.3);color:var(--green)}
+.btn-sm.blue{background:var(--blue-dim);border-color:rgba(79,156,249,.3);color:var(--blue)}
+.btn-sm.amber{background:var(--amber-dim);border-color:rgba(255,181,71,.3);color:var(--amber)}
+
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+th{font-size:16px;font-weight:600;color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+td{padding:10px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+.empty{text-align:center;padding:3rem;color:var(--text3);font-size:13px}
+
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+.b-green{background:rgba(0,200,150,.15);color:#00c896}
+.b-red{background:rgba(255,91,91,.15);color:#ff5b5b}
+.b-amber{background:rgba(255,181,71,.15);color:#ffb547}
+.b-blue{background:rgba(79,156,249,.15);color:#4f9cf9}
+.b-gray{background:rgba(139,145,168,.12);color:#8b91a8}
+.b-purple{background:rgba(160,100,255,.15);color:#a064ff}
+.b-accent{background:rgba(200,0,183,.15);color:#c800b7}
+
+.sbar-wrap{background:var(--surface3);border-radius:4px;height:5px;width:70px;display:inline-block;vertical-align:middle;overflow:hidden}
+.sbar{height:5px;border-radius:4px;transition:width .3s}
+
+.alert{padding:12px 16px;border-radius:var(--radius);font-size:13px;margin-top:10px;display:flex;align-items:flex-start;gap:10px}
+.alert-success{background:rgba(0,200,150,.1);border:1px solid rgba(0,200,150,.25);color:#00c896}
+.alert-warn{background:rgba(255,181,71,.1);border:1px solid rgba(255,181,71,.25);color:#ffb547}
+.alert-danger{background:rgba(255,91,91,.1);border:1px solid rgba(255,91,91,.25);color:#ff5b5b}
+.reorder-box{border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:12px}
+.ro-danger{background:rgba(255,91,91,.08);border:1px solid rgba(255,91,91,.2)}
+.ro-warn{background:rgba(255,181,71,.08);border:1px solid rgba(255,181,71,.2)}
+.ro-title{font-size:12px;font-weight:600;margin-bottom:10px}
+.ro-item{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px}
+.ro-item:last-child{border-bottom:none}
+.restock-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.restock-row:last-child{border-bottom:none}
+
+.bal-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.bal-row:last-child{border-bottom:none}
+.bal-total{font-size:18px;font-weight:600;color:var(--green)}
+
+.user-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.ua-left{display:flex;align-items:center;gap:12px}
+.ua-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
+.ua-name{font-size:13px;font-weight:500}
+.ua-meta{font-size:11px;color:var(--text3)}
+
+.month-nav{display:flex;align-items:center;gap:8px}
+.month-nav span{font-size:14px;font-weight:600;min-width:130px;text-align:center}
+
+.snack{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:11px 18px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.snack.show{opacity:1}
+.snack-success{border-left:3px solid var(--green)}
+.snack-error{border-left:3px solid var(--red)}
+.snack-warn{border-left:3px solid var(--amber)}
+
+.disc-hist-item{padding:10px 12px;background:var(--surface2);border-radius:var(--radius);margin-bottom:6px;display:grid;grid-template-columns:1fr auto auto auto auto;gap:12px;align-items:center;font-size:12px}
+
+/* SUPERVISOR MODAL */
+.sv-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.sv-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-xl);padding:2rem;width:100%;max-width:420px;box-shadow:0 24px 64px rgba(0,0,0,.6)}
+.sv-icon{width:52px;height:52px;background:rgba(255,181,71,.12);border:1px solid rgba(255,181,71,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 1rem}
+.sv-title{font-size:17px;font-weight:600;text-align:center;margin-bottom:.3rem}
+.sv-sub{font-size:13px;color:var(--text3);text-align:center;margin-bottom:1.4rem;line-height:1.5}
+.sv-field{margin-bottom:1rem}
+.sv-field label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:500}
+.sv-field input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 12px;color:var(--text);font-size:14px}
+.sv-field input:focus{outline:none;border-color:var(--amber)}
+.sv-err{color:var(--red);font-size:12px;margin-bottom:.8rem;display:none;text-align:center}
+.sv-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sv-btn-cancel{background:transparent;border:1px solid var(--border2);border-radius:var(--radius);padding:10px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer}
+.sv-btn-cancel:hover{border-color:var(--red);color:var(--red)}
+.sv-btn-confirm{background:var(--amber);border:none;border-radius:var(--radius);padding:10px;font-size:13px;font-weight:600;color:#1a1000;cursor:pointer;transition:opacity .15s}
+.sv-btn-confirm:hover{opacity:.88}
+
+.btn-sm.active-quick{background:var(--accent-dim);border-color:rgba(200,0,183,.35);color:var(--accent);font-weight:600}
+
+/* CASH FLOW / TRANSACTIONS */
+.cashflow-item{padding:9px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;font-size:13px}
+.cashflow-item:last-child{border-bottom:none}
+.cf-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.cf-income{background:rgba(0,200,150,.15)}
+.cf-expense{background:rgba(255,91,91,.15)}
+.cf-ecocash{background:rgba(79,156,249,.15)}
+.cf-details{flex:1}
+.cf-amount{font-weight:600;font-size:14px}
+.cf-amount.income{color:var(--green)}
+.cf-amount.expense{color:var(--red)}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon">🖥️</div>
+      <div>
+        <div class="login-logo-text">My Point Of Sale</div>
+        <div class="login-logo-sub">Karza Technologies</div>
+      </div>
+    </div>
+    <div class="login-title">Welcome back</div>
+    <div class="login-sub">Sign in to your account to continue</div>
+    <div class="lfield"><label>Username</label><input id="lUser" type="text" placeholder="Enter username" autocomplete="off"></div>
+    <div class="lfield"><label>Password</label><input id="lPass" type="password" placeholder="Enter password"></div>
+    <div class="login-err" id="loginErr">Invalid username or password</div>
+    <button class="btn-login" onclick="doLogin()">Sign in</button>
+    <div class="demo-hint">
+      <strong>Demo accounts:</strong><br>
+      admin / admin123 (superuser)<br>
+      sarah / pass123 (sales rep)<br>
+      james / pass123 (sales rep)
+    </div>
+  </div>
+</div>
+
+<div id="appScreen">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="tb-icon">🖥️</div>
+      <div>
+        <div class="tb-title">Karza Technologies</div>
+        <div class="tb-date" id="tbDate"></div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-chip">
+        <div class="user-avatar" id="topAvatar"></div>
+        <div>
+          <div class="user-name" id="topName"></div>
+          <div class="user-role" id="topRole"></div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+  <div class="layout">
+    <div class="sidebar">
+      <div class="nav-label">Sales</div>
+      <div class="nav-item active" onclick="switchTab('sell')" id="nav-sell"><i class="ti ti-receipt"></i> New sale</div>
+      <div class="nav-item" onclick="switchTab('daily')" id="nav-daily"><i class="ti ti-calendar-stats"></i> Today</div>
+      <div class="nav-item" onclick="switchTab('cashflow')" id="nav-cashflow"><i class="ti ti-arrows-exchange"></i> Cash Flow</div>
+      <div class="nav-item" onclick="switchTab('balance')" id="nav-balance"><i class="ti ti-coin"></i> Balance</div>
+      <div class="nav-label">Inventory</div>
+      <div class="nav-item" onclick="switchTab('stock')" id="nav-stock"><i class="ti ti-box"></i> Stock</div>
+      <div class="nav-item" onclick="switchTab('reorder')" id="nav-reorder"><i class="ti ti-bell"></i> Reorder <span class="nav-badge" id="reorderBadge" style="display:none"></span></div>
+      <div class="nav-label">Reports</div>
+      <div class="nav-item" onclick="switchTab('summary')" id="nav-summary"><i class="ti ti-file-report"></i> Day Summary</div>
+      <div class="nav-item" onclick="switchTab('monthly')" id="nav-monthly"><i class="ti ti-chart-bar"></i> Monthly</div>
+      <div class="nav-item" onclick="switchTab('discrepancy')" id="nav-discrepancy"><i class="ti ti-alert-triangle"></i> Discrepancies <span class="nav-badge" id="discBadge" style="display:none"></span></div>
+      <div id="adminNav" style="display:none">
+        <div class="nav-label">Admin</div>
+        <div class="nav-item" onclick="switchTab('users')" id="nav-users"><i class="ti ti-users"></i> Users</div>
+        <div class="nav-item" onclick="switchTab('allreports')" id="nav-allreports"><i class="ti ti-report-analytics"></i> All reports</div>
+      </div>
+    </div>
+    <div class="main">
+
+      <!-- NEW SALE -->
+      <div class="panel active" id="panel-sell">
+        <div class="metrics" id="todayMetrics"></div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Record a sale</div></div>
+          <div class="form-row fr3">
+            <div class="field" id="productFieldWrap">
+              <label>Product / description</label>
+              <input id="fProduct" type="text" placeholder="Type to search stock..." oninput="onProductInput()" autocomplete="off" onblur="hideACDelayed()">
+              <div class="autocomplete-list" id="acList"></div>
+            </div>
+            <div class="field"><label>Category</label><select id="fCat"><option>Phone</option><option>Laptop</option><option>Tablet</option><option>Accessory</option><option>Other</option></select></div>
+            <div class="field"><label>Qty sold</label><input id="fQty" type="number" value="1" min="1" oninput="updatePreview()"></div>
+          </div>
+          <div id="stockHintBar" style="display:none;background:var(--blue-dim);border:1px solid rgba(79,156,249,.2);border-radius:var(--radius);padding:9px 12px;font-size:12px;color:var(--blue);margin-bottom:10px"></div>
+          <div class="form-row fr2">
+            <div class="field"><label>Buying price (per unit) $</label><input id="fBuy" type="number" placeholder="0.00" step="0.01" min="0" oninput="updatePreview()"></div>
+            <div class="field"><label>Selling price (per unit) $</label><input id="fSell" type="number" placeholder="0.00" step="0.01" min="0" oninput="updatePreview()"></div>
+          </div>
+          <div class="field" style="margin-bottom:12px"><label>Customer name (optional)</label><input id="fCustomer" type="text" placeholder="Walk-in customer"></div>
+          <div class="profit-strip">
+            <div class="ps-label">Profit on this sale</div>
+            <div class="ps-val" id="profitPreview">$0.00</div>
+          </div>
+          <button class="btn-primary" onclick="addSale()"><i class="ti ti-check"></i> Record sale &amp; update stock</button>
+        </div>
+      </div>
+
+      <!-- TODAY -->
+      <div class="panel" id="panel-daily">
+        <div class="metrics" id="dailyMetrics"></div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Today's transactions</div>
+            <div style="display:flex;gap:8px">
+              <select id="repFilter" style="font-size:12px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text)" onchange="renderDaily()"></select>
+              <button class="btn-sm" onclick="printDaily()"><i class="ti ti-printer"></i> Print</button>
+            </div>
+          </div>
+          <div class="tbl-wrap" id="dailyTable"></div>
+        </div>
+      </div>
+
+      <!-- CASH FLOW (EcoCash, ZB, expenses, income injections) -->
+      <div class="panel" id="panel-cashflow">
+        <div class="metrics" id="cfMetrics"></div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Record cash flow entry</div></div>
+          <div class="form-row fr3">
+            <div class="field">
+              <label>Type</label>
+              <select id="cfType" onchange="updateCFTypeHint()">
+                <option value="expense">Expense / Money sent to manager</option>
+                <option value="income">Income / Money injected</option>
+                <option value="ecocash_in">EcoCash received (as change)</option>
+                <option value="ecocash_out">EcoCash paid out</option>
+                <option value="zb_in">ZB received (as change)</option>
+                <option value="zb_out">ZB paid out</option>
+              </select>
+            </div>
+            <div class="field"><label>Amount $</label><input id="cfAmount" type="number" placeholder="0.00" step="0.01" min="0"></div>
+            <div class="field"><label>Reference / Notes</label><input id="cfNote" type="text" placeholder="e.g. Midday handover to manager"></div>
+          </div>
+          <div id="cfTypeHint" style="font-size:12px;color:var(--text3);margin-bottom:12px;padding:8px 12px;background:var(--surface2);border-radius:var(--radius)"></div>
+          <button class="btn-primary" onclick="addCashFlow()" style="width:auto;padding:10px 24px"><i class="ti ti-plus"></i> Record entry</button>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Today's cash flow entries</div></div>
+          <div id="cfList"></div>
+        </div>
+      </div>
+
+      <!-- BALANCE -->
+      <div class="panel" id="panel-balance">
+        <div class="card">
+          <div class="card-head"><div class="card-title">End-of-day cash summary — <span id="balUser" style="color:var(--accent)"></span></div></div>
+          <div class="bal-row"><span style="color:var(--text2)">Sales revenue (my sales today)</span><span id="balSales" style="font-weight:600">$0.00</span></div>
+          <div class="bal-row"><span style="color:var(--text2)">Cost of goods</span><span id="balCost" style="color:var(--red);font-weight:600">−$0.00</span></div>
+          <div class="bal-row"><span style="color:var(--text2)">Income injections today</span><span id="balIncome" style="color:var(--green);font-weight:600">+$0.00</span></div>
+          <div class="bal-row"><span style="color:var(--text2)">Expenses / Manager payouts</span><span id="balExpense" style="color:var(--red);font-weight:600">−$0.00</span></div>
+          <div class="bal-row"><span style="color:var(--text2)">EcoCash net (in − out)</span><span id="balEco" style="font-weight:600">$0.00</span></div>
+          <div class="bal-row"><span style="color:var(--text2)">ZB net (in − out)</span><span id="balZB" style="font-weight:600">$0.00</span></div>
+          <div class="bal-row"><span style="font-weight:500">Expected cash in hand</span><span id="balOwner" class="bal-total">$0.00</span></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Cash verification</div></div>
+          <div class="form-row fr2">
+            <div class="field"><label>Cash physically counted $</label><input id="cashIn" type="number" placeholder="0.00" step="0.01" min="0" oninput="checkBalance()"></div>
+            <div class="field"><label>Notes (optional)</label><input id="cashNote" type="text" placeholder="Any remarks..."></div>
+          </div>
+          <div id="diffBlock" style="display:none"></div>
+          <div style="margin-top:12px">
+            <button class="btn-primary" onclick="saveBalance()" style="width:auto;padding:10px 24px">Submit balance report</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STOCK -->
+      <div class="panel" id="panel-stock">
+        <div class="metrics" id="stockMetrics"></div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Add / update stock item</div></div>
+          <div class="form-row fr4">
+            <div class="field"><label>Product name</label><input id="sName" type="text" placeholder="e.g. Samsung A25"></div>
+            <div class="field"><label>Category</label><select id="sCat"><option>Phone</option><option>Laptop</option><option>Tablet</option><option>Accessory</option><option>Other</option></select></div>
+            <div class="field"><label>Qty in stock</label><input id="sQty" type="number" value="1" min="0"></div>
+            <div class="field"><label>Reorder level</label><input id="sReorder" type="number" value="2" min="0"></div>
+          </div>
+          <div class="form-row fr2">
+            <div class="field"><label>Cost price $</label><input id="sCost" type="number" placeholder="0.00" step="0.01" min="0"></div>
+            <div class="field"><label>Selling price $</label><input id="sSell" type="number" placeholder="0.00" step="0.01" min="0"></div>
+          </div>
+          <button class="btn-primary" onclick="addStock()"><i class="ti ti-plus"></i> Save to stock</button>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Current inventory</div>
+            <input type="text" placeholder="Search..." style="font-size:12px;padding:6px 10px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);width:160px" oninput="renderStockTable(this.value)">
+          </div>
+          <div class="tbl-wrap" id="stockTable"></div>
+        </div>
+      </div>
+
+      <!-- REORDER -->
+      <div class="panel" id="panel-reorder">
+        <div id="reorderContent"></div>
+      </div>
+
+      <!-- MONTHLY -->
+      <div class="panel" id="panel-monthly">
+        <div class="card-head" style="margin-bottom:1rem">
+          <div class="month-nav">
+            <button class="btn-sm" onclick="changeMonth(-1)"><i class="ti ti-arrow-left"></i></button>
+            <span id="monthTitle"></span>
+            <button class="btn-sm" onclick="changeMonth(1)"><i class="ti ti-arrow-right"></i></button>
+          </div>
+          <select id="monthRepFilter" style="font-size:12px;padding:6px 10px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text)" onchange="renderMonthly()"></select>
+        </div>
+        <div class="metrics" id="monthMetrics"></div>
+        <div class="card" id="monthDiscCard" style="display:none">
+          <div class="card-head"><div class="card-title">Cash discrepancies this month</div></div>
+          <div id="monthDiscList"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Sales breakdown</div></div>
+          <div class="tbl-wrap" id="monthTable"></div>
+        </div>
+      </div>
+
+      <!-- DAY SUMMARY -->
+      <div class="panel" id="panel-summary">
+        <!-- filter bar -->
+        <div class="card" style="margin-bottom:1rem">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <div style="font-size:13px;font-weight:600;color:var(--text2);white-space:nowrap">View summary for:</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap" id="sumQuickBtns">
+              <button class="btn-sm active-quick" id="sqToday" onclick="setSumQuick('today')">Today</button>
+              <button class="btn-sm" id="sqYest" onclick="setSumQuick('yesterday')">Yesterday</button>
+              <button class="btn-sm" id="sqWeek" onclick="setSumQuick('week')">Last 7 days</button>
+              <button class="btn-sm" id="sqMonth" onclick="setSumQuick('month')">This month</button>
+              <button class="btn-sm" id="sqCustom" onclick="setSumQuick('custom')">Custom range</button>
+            </div>
+            <div id="sumCustomRange" style="display:none;gap:8px;align-items:center;flex-wrap:wrap">
+              <input type="date" id="sumFrom" onchange="renderSummary()" style="font-size:12px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text)">
+              <span style="color:var(--text3);font-size:12px">to</span>
+              <input type="date" id="sumTo" onchange="renderSummary()" style="font-size:12px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text)">
+            </div>
+            <div style="margin-left:auto;display:flex;gap:6px">
+              <select id="sumRepFilter" style="font-size:12px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text)" onchange="renderSummary()"></select>
+              <button class="btn-sm" onclick="printSummary()"><i class="ti ti-printer"></i> Print</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- period label -->
+        <div style="font-size:18px;font-weight:600;color:var(--text);margin-bottom:1rem" id="sumPeriodLabel"></div>
+
+        <!-- top metrics -->
+        <div class="metrics" id="sumMetrics"></div>
+
+        <!-- two-column detail -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem" id="sumDetailGrid">
+
+          <div class="card" id="sumSalesCard">
+            <div class="card-head"><div class="card-title">Sales breakdown</div><span id="sumSalesCount" style="font-size:11px;color:var(--text3)"></span></div>
+            <div id="sumSalesList"></div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:1rem">
+            <div class="card">
+              <div class="card-head"><div class="card-title">Cash reconciliation</div></div>
+              <div id="sumBalList"></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><div class="card-title">Cash flow entries</div></div>
+              <div id="sumCFList"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- discrepancies for period -->
+        <div class="card" id="sumDiscCard">
+          <div class="card-head"><div class="card-title">Discrepancies in period</div></div>
+          <div id="sumDiscList"></div>
+        </div>
+
+        <!-- full transaction table -->
+        <div class="card">
+          <div class="card-head"><div class="card-title">All transactions in period</div></div>
+          <div class="tbl-wrap" id="sumTxTable"></div>
+        </div>
+      </div>
+
+      <!-- DISCREPANCY -->
+      <div class="panel" id="panel-discrepancy">
+        <div class="metrics" id="discMetrics"></div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Balance submission history</div><span id="discAdminNote" style="font-size:11px;color:var(--text3)"></span></div>
+          <div id="discHistory"></div>
+        </div>
+      </div>
+
+      <!-- USERS (admin) -->
+      <div class="panel" id="panel-users">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Add new user</div></div>
+          <div class="form-row fr4">
+            <div class="field"><label>Full name</label><input id="uName" type="text" placeholder="e.g. Grace Moyo"></div>
+            <div class="field"><label>Username</label><input id="uUser" type="text" placeholder="e.g. grace"></div>
+            <div class="field"><label>Password</label><input id="uPass" type="password" placeholder="Password"></div>
+            <div class="field"><label>Role</label><select id="uRole"><option value="rep">Sales rep</option><option value="admin">Admin</option></select></div>
+          </div>
+          <button class="btn-primary" onclick="addUser()" style="width:auto;padding:10px 24px"><i class="ti ti-user-plus"></i> Create user</button>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">System users</div></div>
+          <div id="usersList"></div>
+        </div>
+      </div>
+
+      <!-- ALL REPORTS (admin) -->
+      <div class="panel" id="panel-allreports">
+        <div class="card-head" style="margin-bottom:1rem">
+          <div class="month-nav">
+            <button class="btn-sm" onclick="changeMonth2(-1)"><i class="ti ti-arrow-left"></i></button>
+            <span id="monthTitle2"></span>
+            <button class="btn-sm" onclick="changeMonth2(1)"><i class="ti ti-arrow-right"></i></button>
+          </div>
+        </div>
+        <div class="metrics" id="allRepMetrics"></div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Per-rep performance</div></div>
+          <div class="tbl-wrap" id="repPerfTable"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">All transactions</div></div>
+          <div class="tbl-wrap" id="allTxTable"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- SUPERVISOR PASSWORD MODAL -->
+<div class="sv-overlay" id="svOverlay" style="display:none">
+  <div class="sv-box">
+    <div class="sv-icon">🔒</div>
+    <div class="sv-title" id="svTitle">Supervisor Authorisation Required</div>
+    <div class="sv-sub" id="svSub">This action requires a supervisor or admin password to proceed.</div>
+    <div class="sv-field">
+      <label>Supervisor username</label>
+      <input id="svUser" type="text" placeholder="Enter supervisor username" autocomplete="off">
+    </div>
+    <div class="sv-field">
+      <label>Supervisor password</label>
+      <input id="svPass" type="password" placeholder="Enter password">
+    </div>
+    <div class="sv-err" id="svErr">Incorrect credentials or insufficient permissions</div>
+    <div class="sv-btns">
+      <button class="sv-btn-cancel" onclick="svCancel()">Cancel</button>
+      <button class="sv-btn-confirm" onclick="svConfirm()">Authorise</button>
+    </div>
+  </div>
+</div>
+
+<div class="snack" id="snack"></div>
+
+<script>
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+let viewMonth=new Date().getMonth(),viewYear=new Date().getFullYear();
+let viewMonth2=new Date().getMonth(),viewYear2=new Date().getFullYear();
+let currentUser=null;
+let selectedStockItem=null; // track which stock item was selected from autocomplete
+
+// ─── STORAGE ───────────────────────────────────────────────
+function ls(k){try{return JSON.parse(localStorage.getItem(k))||null}catch{return null}}
+function lsArr(k){try{return JSON.parse(localStorage.getItem(k))||[]}catch{return[]}}
+function lsSave(k,v){localStorage.setItem(k,JSON.stringify(v))}
+
+function initUsers(){
+  if(!ls('ts_users')){
+    lsSave('ts_users',[
+      {id:'u1',name:'Admin',username:'admin',password:'admin123',role:'admin',active:true},
+      {id:'u2',name:'Sarah Moyo',username:'sarah',password:'pass123',role:'rep',active:true},
+      {id:'u3',name:'James Dube',username:'james',password:'pass123',role:'rep',active:true}
+    ]);
+  }
+}
+
+function loadUsers(){return lsArr('ts_users')}
+function loadSales(){return lsArr('ts_sales')}
+function saveSales(d){lsSave('ts_sales',d)}
+function loadStock(){return lsArr('ts_stock')}
+function saveStock(d){lsSave('ts_stock',d)}
+function loadBalances(){return lsArr('ts_balances')}
+function saveBalances(d){lsSave('ts_balances',d)}
+function loadCashFlow(){return lsArr('ts_cashflow')}
+function saveCashFlow(d){lsSave('ts_cashflow',d)}
+
+// ─── SESSION PERSISTENCE (FIX #1) ──────────────────────────
+function saveSession(user){lsSave('ts_session',{uid:user.id,time:Date.now()})}
+function clearSession(){localStorage.removeItem('ts_session')}
+function restoreSession(){
+  const s=ls('ts_session');
+  if(!s)return false;
+  // session expires after 12 hours
+  if(Date.now()-s.time>12*60*60*1000){clearSession();return false}
+  const users=loadUsers();
+  const user=users.find(u=>u.id===s.uid&&u.active!==false);
+  if(!user){clearSession();return false}
+  return user;
+}
+
+// ─── HELPERS ───────────────────────────────────────────────
+function today(){return new Date().toISOString().slice(0,10)}
+function fmt(n){return '$'+parseFloat(n||0).toFixed(2)}
+function fmtN(n){return '$'+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function initials(name){return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}
+
+let snackTimer;
+function showSnack(msg,type='success'){
+  clearTimeout(snackTimer);
+  const s=document.getElementById('snack');
+  s.textContent=msg;s.className='snack show snack-'+type;
+  snackTimer=setTimeout(()=>s.classList.remove('show'),3200);
+}
+
+// ─── LOGIN / LOGOUT ────────────────────────────────────────
+function doLogin(){
+  const u=document.getElementById('lUser').value.trim().toLowerCase();
+  const p=document.getElementById('lPass').value;
+  const found=loadUsers().find(x=>x.username.toLowerCase()===u&&x.password===p&&x.active!==false);
+  if(!found){document.getElementById('loginErr').style.display='block';return}
+  document.getElementById('loginErr').style.display='none';
+  bootApp(found);
+  saveSession(found);
+}
+
+function bootApp(user){
+  currentUser=user;
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appScreen').style.display='flex';
+  document.getElementById('topAvatar').textContent=initials(user.name);
+  document.getElementById('topName').textContent=user.name;
+  document.getElementById('topRole').textContent=user.role==='admin'?'Administrator':'Sales rep';
+  document.getElementById('tbDate').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
+  if(user.role==='admin')document.getElementById('adminNav').style.display='block';
+  else document.getElementById('adminNav').style.display='none';
+  updateReorderBadge();updateDiscBadge();
+  switchTab('sell');
+}
+
+function doLogout(){
+  currentUser=null;clearSession();
+  document.getElementById('appScreen').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('lUser').value='';document.getElementById('lPass').value='';
+}
+
+document.getElementById('lPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+
+// ─── NAVIGATION ────────────────────────────────────────────
+function switchTab(name){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const nav=document.getElementById('nav-'+name);if(nav)nav.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  if(name==='sell')renderTodayMetrics('todayMetrics');
+  if(name==='daily'){buildRepFilter('repFilter');renderDaily();}
+  if(name==='cashflow')renderCashFlow();
+  if(name==='balance')renderBalance();
+  if(name==='stock'){renderStockMetrics();renderStockTable('');}
+  if(name==='reorder')renderReorder();
+  if(name==='summary'){buildRepFilter('sumRepFilter');renderSummary();}
+  if(name==='monthly'){buildRepFilter('monthRepFilter');renderMonthly();}
+  if(name==='discrepancy')renderDiscrepancy();
+  if(name==='users')renderUsers();
+  if(name==='allreports')renderAllReports();
+}
+
+function buildRepFilter(elId){
+  const el=document.getElementById(elId);if(!el)return;
+  const users=loadUsers();
+  let opts='<option value="">All reps</option>';
+  if(currentUser&&currentUser.role!=='admin')opts=`<option value="${currentUser.id}">${currentUser.name} (me)</option>`;
+  else users.forEach(u=>opts+=`<option value="${u.id}">${u.name}</option>`);
+  el.innerHTML=opts;
+  if(currentUser&&currentUser.role!=='admin')el.value=currentUser.id;
+}
+
+// ─── SALES ─────────────────────────────────────────────────
+function todaySales(uid){
+  const s=loadSales().filter(x=>x.date===today());
+  return uid?s.filter(x=>x.uid===uid):s;
+}
+function mySales(){return currentUser?todaySales(currentUser.id):todaySales()}
+
+function renderTodayMetrics(id){
+  const sales=mySales();
+  const rev=sales.reduce((a,s)=>a+s.revenue,0);
+  const cost=sales.reduce((a,s)=>a+s.cost,0);
+  document.getElementById(id).innerHTML=`
+    <div class="metric"><div class="metric-label">My sales today</div><div class="metric-val">${sales.length}</div></div>
+    <div class="metric"><div class="metric-label">Revenue</div><div class="metric-val">${fmtN(rev)}</div></div>
+    <div class="metric"><div class="metric-label">Cost</div><div class="metric-val">${fmtN(cost)}</div></div>
+    <div class="metric"><div class="metric-label">Profit today</div><div class="metric-val green">${fmtN(rev-cost)}</div></div>`;
+}
+
+// ─── AUTOCOMPLETE (FIX #5) ─────────────────────────────────
+let acHideTimer=null;
+function onProductInput(){
+  const q=document.getElementById('fProduct').value.trim().toLowerCase();
+  selectedStockItem=null;
+  document.getElementById('stockHintBar').style.display='none';
+  if(q.length<1){hideAC();return}
+  const stock=loadStock();
+  const matches=stock.filter(s=>s.name.toLowerCase().includes(q)).slice(0,8);
+  if(!matches.length){hideAC();return}
+  const list=document.getElementById('acList');
+  list.innerHTML=matches.map(s=>`
+    <div class="autocomplete-item" onmousedown="selectStockItem('${s.id}')">
+      <div class="ac-name">${s.name}</div>
+      <div class="ac-meta">${s.cat} · ${s.qty} in stock · Cost $${s.cost} · Sell $${s.sell}</div>
+    </div>`).join('');
+  list.classList.add('show');
+}
+
+function selectStockItem(id){
+  const stock=loadStock();
+  const item=stock.find(s=>s.id===id);
+  if(!item)return;
+  selectedStockItem=item;
+  document.getElementById('fProduct').value=item.name;
+  document.getElementById('fCat').value=item.cat;
+  document.getElementById('fBuy').value=item.cost;
+  document.getElementById('fSell').value=item.sell;
+  updatePreview();
+  hideAC();
+  const hint=document.getElementById('stockHintBar');
+  hint.style.display='block';
+  hint.innerHTML=`<i class="ti ti-box"></i> <strong>${item.name}</strong> — ${item.qty} in stock · Cost $${item.cost} · Sell $${item.sell}`;
+}
+
+function hideAC(){document.getElementById('acList').classList.remove('show')}
+function hideACDelayed(){acHideTimer=setTimeout(hideAC,200)}
+
+function updatePreview(){
+  const buy=parseFloat(document.getElementById('fBuy').value)||0;
+  const sell=parseFloat(document.getElementById('fSell').value)||0;
+  const qty=parseInt(document.getElementById('fQty').value)||1;
+  const p=(sell-buy)*qty;
+  const el=document.getElementById('profitPreview');
+  el.textContent=fmt(p);el.className='ps-val'+(p<0?' neg':'');
+}
+
+// FIX #6: stock update — match by selectedStockItem.id first, then by name
+function addSale(){
+  const product=document.getElementById('fProduct').value.trim();
+  const cat=document.getElementById('fCat').value;
+  const qty=parseInt(document.getElementById('fQty').value)||1;
+  const buy=parseFloat(document.getElementById('fBuy').value);
+  const sell=parseFloat(document.getElementById('fSell').value);
+  const customer=document.getElementById('fCustomer').value.trim()||'Walk-in';
+  if(!product){showSnack('Enter a product name','error');return}
+  if(isNaN(buy)||isNaN(sell)){showSnack('Enter buying and selling prices','error');return}
+
+  const sales=loadSales();
+  const id='S'+(Date.now().toString().slice(-6));
+  const saleRecord={id,date:today(),time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),product,cat,qty,buy,sell,customer,profit:(sell-buy)*qty,revenue:sell*qty,cost:buy*qty,uid:currentUser.id,uname:currentUser.name};
+  sales.push(saleRecord);
+  saveSales(sales);
+
+  // Update stock — use selectedStockItem id for precise match, fallback to name
+  const stock=loadStock();
+  let idx=-1;
+  if(selectedStockItem){idx=stock.findIndex(s=>s.id===selectedStockItem.id);}
+  if(idx<0){idx=stock.findIndex(s=>s.name.toLowerCase()===product.toLowerCase());}
+  let msg=`Sale ${id} recorded`;
+  if(idx>=0){
+    stock[idx].qty=Math.max(0,stock[idx].qty-qty);
+    saveStock(stock);
+    msg+=` · Stock: ${stock[idx].qty} left`;
+    if(stock[idx].qty<=stock[idx].reorder)msg+=' ⚠';
+  }
+
+  // reset form
+  ['fProduct','fBuy','fSell','fCustomer'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('fQty').value=1;
+  document.getElementById('profitPreview').textContent='$0.00';
+  document.getElementById('profitPreview').className='ps-val';
+  document.getElementById('stockHintBar').style.display='none';
+  selectedStockItem=null;
+  showSnack(msg);updateReorderBadge();renderTodayMetrics('todayMetrics');
+}
+
+function renderSalesTable(sales,container,canDelete){
+  if(!sales.length){container.innerHTML='<div class="empty"><i class="ti ti-receipt-off" style="font-size:24px;display:block;margin-bottom:8px"></i>No sales yet</div>';return}
+  let h='<table><thead><tr><th style="width:7%">Time</th><th style="width:8%">Ref</th><th style="width:22%">Product</th><th style="width:5%">Qty</th><th style="width:9%">Buy</th><th style="width:9%">Sell</th><th style="width:10%">Profit</th><th style="width:13%">Rep</th><th style="width:10%">Customer</th>'+(canDelete?'<th style="width:7%"></th>':'')+'</tr></thead><tbody>';
+  sales.forEach(s=>{
+    const pm=s.profit>=0;
+    h+=`<tr><td style="color:var(--text3);font-family:'DM Mono',monospace">${s.time||'—'}</td><td><span class="badge b-blue">${s.id}</span></td><td title="${s.product}">${s.product}</td><td>${s.qty}</td><td>${fmt(s.buy)}</td><td>${fmt(s.sell)}</td><td><span class="badge ${pm?'b-green':'b-red'}">${pm?'+':''}${fmt(s.profit)}</span></td><td style="color:var(--text2)">${s.uname||'—'}</td><td style="color:var(--text3)">${s.customer||'Walk-in'}</td>${canDelete?`<td><button class="btn-sm danger" onclick="deleteSale('${s.id}')" title="Requires supervisor"><i class="ti ti-trash"></i></button></td>`:'<td></td>'}</tr>`;
+  });
+  h+='</tbody></table>';container.innerHTML=h;
+}
+
+// ─── SUPERVISOR MODAL ──────────────────────────────────────
+let svCallback=null;
+function requireSupervisor(title,sub,cb){
+  if(currentUser.role==='admin'){cb();return;} // admins skip the modal
+  svCallback=cb;
+  document.getElementById('svTitle').textContent=title||'Supervisor Authorisation Required';
+  document.getElementById('svSub').textContent=sub||'This action requires a supervisor or admin to authorise.';
+  document.getElementById('svUser').value='';
+  document.getElementById('svPass').value='';
+  document.getElementById('svErr').style.display='none';
+  document.getElementById('svOverlay').style.display='flex';
+  setTimeout(()=>document.getElementById('svUser').focus(),80);
+}
+function svCancel(){document.getElementById('svOverlay').style.display='none';svCallback=null;}
+function svConfirm(){
+  const u=document.getElementById('svUser').value.trim().toLowerCase();
+  const p=document.getElementById('svPass').value;
+  const users=loadUsers();
+  const supervisor=users.find(x=>x.username.toLowerCase()===u&&x.password===p&&x.role==='admin'&&x.active!==false);
+  if(!supervisor){document.getElementById('svErr').style.display='block';return;}
+  document.getElementById('svOverlay').style.display='none';
+  document.getElementById('svErr').style.display='none';
+  const cb=svCallback;svCallback=null;
+  if(cb)cb(supervisor);
+}
+document.getElementById('svPass').addEventListener('keydown',e=>{if(e.key==='Enter')svConfirm();});
+
+function deleteSale(id){
+  requireSupervisor(
+    'Delete Sale — Supervisor Required',
+    'Deleting a sale record is a restricted action. A supervisor or admin must enter their credentials to proceed.',
+    ()=>{
+      saveSales(loadSales().filter(s=>s.id!==id));
+      renderDaily();renderTodayMetrics('todayMetrics');showSnack('Sale deleted','warn');
+    }
+  );
+}
+
+function renderDaily(){
+  const filter=document.getElementById('repFilter');
+  const uid=filter?filter.value:'';
+  let sales=loadSales().filter(s=>s.date===today());
+  if(uid)sales=sales.filter(s=>s.uid===uid);
+  const rev=sales.reduce((a,s)=>a+s.revenue,0);
+  const cost=sales.reduce((a,s)=>a+s.cost,0);
+  document.getElementById('dailyMetrics').innerHTML=`
+    <div class="metric"><div class="metric-label">Transactions</div><div class="metric-val">${sales.length}</div></div>
+    <div class="metric"><div class="metric-label">Revenue</div><div class="metric-val">${fmtN(rev)}</div></div>
+    <div class="metric"><div class="metric-label">Cost</div><div class="metric-val">${fmtN(cost)}</div></div>
+    <div class="metric"><div class="metric-label">Net profit</div><div class="metric-val green">${fmtN(rev-cost)}</div></div>`;
+  renderSalesTable(sales,document.getElementById('dailyTable'),true);
+}
+
+// ─── CASH FLOW (FIX #4) ────────────────────────────────────
+const CF_LABELS={
+  expense:'Expense / Manager payout',
+  income:'Income injection',
+  ecocash_in:'EcoCash received',
+  ecocash_out:'EcoCash paid out',
+  zb_in:'ZB received',
+  zb_out:'ZB paid out'
+};
+const CF_HINTS={
+  expense:'Money paid out or handed to the manager mid-day. This reduces your cash balance.',
+  income:'Money added from an external source (owner injection, etc). This increases your cash balance.',
+  ecocash_in:'Customer paid via EcoCash and you gave cash as change. EcoCash in, cash out — reduces cash.',
+  ecocash_out:'You paid out EcoCash to someone. Cash balance unaffected; tracked for records.',
+  zb_in:'Customer paid via ZB Bank and you gave cash as change. ZB in, cash out — reduces cash.',
+  zb_out:'You paid out via ZB Bank. Tracked for records.'
+};
+
+function updateCFTypeHint(){
+  const t=document.getElementById('cfType').value;
+  document.getElementById('cfTypeHint').textContent=CF_HINTS[t]||'';
+}
+
+function addCashFlow(){
+  const type=document.getElementById('cfType').value;
+  const amount=parseFloat(document.getElementById('cfAmount').value);
+  const note=document.getElementById('cfNote').value.trim();
+  if(isNaN(amount)||amount<=0){showSnack('Enter a valid amount','error');return}
+  const cf=loadCashFlow();
+  cf.push({id:'CF'+(Date.now().toString().slice(-6)),date:today(),time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),type,amount,note,uid:currentUser.id,uname:currentUser.name});
+  saveCashFlow(cf);
+  document.getElementById('cfAmount').value='';document.getElementById('cfNote').value='';
+  showSnack('Cash flow entry recorded');renderCashFlow();renderBalance();
+}
+
+function deleteCF(id){
+  if(!confirm('Delete this cash flow entry?'))return;
+  saveCashFlow(loadCashFlow().filter(c=>c.id!==id));
+  renderCashFlow();renderBalance();showSnack('Entry deleted','warn');
+}
+
+function todayCF(){return loadCashFlow().filter(c=>c.date===today()&&c.uid===currentUser.id)}
+
+function calcCFTotals(uid){
+  const cf=uid?loadCashFlow().filter(c=>c.date===today()&&c.uid===uid):loadCashFlow().filter(c=>c.date===today());
+  const income=cf.filter(c=>c.type==='income').reduce((a,c)=>a+c.amount,0);
+  const expense=cf.filter(c=>c.type==='expense').reduce((a,c)=>a+c.amount,0);
+  const ecoIn=cf.filter(c=>c.type==='ecocash_in').reduce((a,c)=>a+c.amount,0);
+  const ecoOut=cf.filter(c=>c.type==='ecocash_out').reduce((a,c)=>a+c.amount,0);
+  const zbIn=cf.filter(c=>c.type==='zb_in').reduce((a,c)=>a+c.amount,0);
+  const zbOut=cf.filter(c=>c.type==='zb_out').reduce((a,c)=>a+c.amount,0);
+  return {income,expense,ecoIn,ecoOut,zbIn,zbOut,ecoNet:ecoIn-ecoOut,zbNet:zbIn-zbOut};
+}
+
+function renderCashFlow(){
+  const cf=todayCF();
+  const t=calcCFTotals(currentUser.id);
+  document.getElementById('cfMetrics').innerHTML=`
+    <div class="metric"><div class="metric-label">Income injected</div><div class="metric-val green">${fmtN(t.income)}</div></div>
+    <div class="metric"><div class="metric-label">Expenses / Payouts</div><div class="metric-val red">${fmtN(t.expense)}</div></div>
+    <div class="metric"><div class="metric-label">EcoCash net</div><div class="metric-val blue">${fmtN(t.ecoNet)}</div></div>
+    <div class="metric"><div class="metric-label">ZB net</div><div class="metric-val blue">${fmtN(t.zbNet)}</div></div>`;
+  updateCFTypeHint();
+  const el=document.getElementById('cfList');
+  if(!cf.length){el.innerHTML='<div class="empty">No cash flow entries today</div>';return}
+  const icons={expense:'💸',income:'💰',ecocash_in:'📲',ecocash_out:'📤',zb_in:'🏦',zb_out:'🏧'};
+  const isOut=t=>['expense','ecocash_in','zb_in'].includes(t);
+  el.innerHTML=cf.map(c=>`
+    <div class="cashflow-item">
+      <div class="cf-icon ${c.type.startsWith('eco')?'cf-ecocash':c.type==='income'?'cf-income':'cf-expense'}">${icons[c.type]||'💵'}</div>
+      <div class="cf-details">
+        <div style="font-weight:500">${CF_LABELS[c.type]}</div>
+        <div style="font-size:11px;color:var(--text3)">${c.time} · ${c.note||'No notes'}</div>
+      </div>
+      <div class="cf-amount ${isOut(c.type)?'expense':'income'}">${isOut(c.type)?'−':'+'} ${fmt(c.amount)}</div>
+      <button class="btn-sm danger" onclick="deleteCF('${c.id}')"><i class="ti ti-trash"></i></button>
+    </div>`).join('');
+}
+
+// ─── BALANCE (FIX #4: includes cash flow) ──────────────────
+function calcExpectedCash(uid){
+  const sales=todaySales(uid);
+  const rev=sales.reduce((a,s)=>a+s.revenue,0);
+  const t=calcCFTotals(uid);
+  // cash = revenue + income - expenses - ecocash_in (you gave change) - zb_in (you gave change)
+  return rev + t.income - t.expense - t.ecoIn - t.zbIn;
+}
+
+function renderBalance(){
+  const sales=mySales();
+  const rev=sales.reduce((a,s)=>a+s.revenue,0);
+  const cost=sales.reduce((a,s)=>a+s.cost,0);
+  const t=calcCFTotals(currentUser.id);
+  const expected=calcExpectedCash(currentUser.id);
+  document.getElementById('balUser').textContent=currentUser.name;
+  document.getElementById('balSales').textContent=fmtN(rev);
+  document.getElementById('balCost').textContent='−'+fmtN(cost);
+  document.getElementById('balIncome').textContent='+'+fmtN(t.income);
+  document.getElementById('balExpense').textContent='−'+fmtN(t.expense);
+  document.getElementById('balEco').textContent=(t.ecoNet>=0?'+':'')+fmtN(t.ecoNet);
+  document.getElementById('balZB').textContent=(t.zbNet>=0?'+':'')+fmtN(t.zbNet);
+  document.getElementById('balOwner').textContent=fmtN(expected);
+  document.getElementById('cashIn').value='';
+  document.getElementById('diffBlock').style.display='none';
+}
+
+function checkBalance(){
+  const expected=calcExpectedCash(currentUser.id);
+  const cashIn=parseFloat(document.getElementById('cashIn').value);
+  if(isNaN(cashIn)){document.getElementById('diffBlock').style.display='none';return}
+  const diff=parseFloat((cashIn-expected).toFixed(2));
+  const block=document.getElementById('diffBlock');
+  block.style.display='block';
+  if(Math.abs(diff)<0.01){block.className='alert alert-success';block.innerHTML='<i class="ti ti-circle-check"></i> Cash matches records exactly — perfect balance!';}
+  else if(diff>0){block.className='alert alert-warn';block.innerHTML=`<i class="ti ti-alert-triangle"></i> <strong>Over by ${fmt(diff)}</strong> — more cash than expected. Check for unrecorded income.`;}
+  else{block.className='alert alert-danger';block.innerHTML=`<i class="ti ti-alert-triangle"></i> <strong>Short by ${fmt(Math.abs(diff))}</strong> — less cash than expected. Check for missing entries or unrecorded expenses.`;}
+}
+
+function saveBalance(){
+  const expected=calcExpectedCash(currentUser.id);
+  const cashIn=parseFloat(document.getElementById('cashIn').value);
+  const note=document.getElementById('cashNote').value.trim();
+  if(isNaN(cashIn)){showSnack('Enter the cash amount first','error');return}
+  const diff=parseFloat((cashIn-expected).toFixed(2));
+  const status=Math.abs(diff)<0.01?'balanced':diff>0?'over':'short';
+  const sales=mySales();
+  const balances=loadBalances();
+  balances.push({id:'B'+(Date.now().toString().slice(-6)),date:today(),time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),uid:currentUser.id,uname:currentUser.name,expected,submitted:cashIn,diff,status,note,txCount:sales.length,cleared:false,clearedBy:null,clearedAt:null});
+  saveBalances(balances);
+  updateDiscBadge();
+  showSnack(status==='balanced'?'Balance submitted — perfect!':status==='over'?`Submitted — over by ${fmt(diff)}`:`Submitted — short by ${fmt(Math.abs(diff))}`,status==='balanced'?'success':'warn');
+}
+
+// ─── DISCREPANCY (FIX #2: admin can clear) ─────────────────
+function updateDiscBadge(){
+  const n=loadBalances().filter(b=>b.status!=='balanced'&&!b.cleared).length;
+  const badge=document.getElementById('discBadge');
+  badge.textContent=n;badge.style.display=n>0?'inline':'none';
+}
+
+// FIX #2: only admin can clear; can be done the next day
+function clearDiscrepancy(id){
+  if(currentUser.role!=='admin'){showSnack('Only admin can clear discrepancies','error');return}
+  const balances=loadBalances();
+  const idx=balances.findIndex(b=>b.id===id);
+  if(idx<0)return;
+  const note=prompt('Enter reason for clearing this discrepancy:');
+  if(note===null)return; // cancelled
+  balances[idx].cleared=true;
+  balances[idx].clearedBy=currentUser.name;
+  balances[idx].clearedAt=new Date().toLocaleString('en-GB');
+  balances[idx].clearNote=note||'Cleared by admin';
+  saveBalances(balances);
+  updateDiscBadge();renderDiscrepancy();
+  showSnack('Discrepancy cleared');
+}
+
+function renderDiscrepancy(){
+  const balances=loadBalances();
+  const uncleared=balances.filter(b=>b.status!=='balanced'&&!b.cleared);
+  const over=balances.filter(b=>b.status==='over').length;
+  const short=balances.filter(b=>b.status==='short').length;
+  const balanced=balances.filter(b=>b.status==='balanced').length;
+  document.getElementById('discMetrics').innerHTML=`
+    <div class="metric"><div class="metric-label">Submissions</div><div class="metric-val">${balances.length}</div></div>
+    <div class="metric"><div class="metric-label">Balanced</div><div class="metric-val green">${balanced}</div></div>
+    <div class="metric"><div class="metric-label">Short</div><div class="metric-val red">${short}</div></div>
+    <div class="metric"><div class="metric-label">Over</div><div class="metric-val amber">${over}</div></div>
+    <div class="metric"><div class="metric-label">Pending clearance</div><div class="metric-val red">${uncleared.length}</div></div>`;
+  if(currentUser.role==='admin')document.getElementById('discAdminNote').textContent='You can clear discrepancies using the Clear button';
+  const hist=document.getElementById('discHistory');
+  if(!balances.length){hist.innerHTML='<div class="empty">No balance submissions yet</div>';return}
+  const sorted=[...balances].reverse();
+  let h='';
+  sorted.forEach(b=>{
+    const sc=b.status==='balanced'?'b-green':b.status==='over'?'b-amber':'b-red';
+    const diffTxt=b.status==='balanced'?'Exact':b.status==='over'?`+${fmt(b.diff)}`:`${fmt(b.diff)}`;
+    const clearBtn=currentUser.role==='admin'&&b.status!=='balanced'&&!b.cleared
+      ?`<button class="btn-sm amber" onclick="clearDiscrepancy('${b.id}')"><i class="ti ti-check"></i> Clear</button>`:'';
+    const clearedInfo=b.cleared?`<div style="font-size:10px;color:var(--green)">Cleared by ${b.clearedBy} · ${b.clearedAt}<br>${b.clearNote||''}</div>`:'';
+    h+=`<div class="disc-hist-item" style="${b.cleared?'opacity:.7':''}">
+      <div>
+        <div style="font-weight:500">${b.uname}</div>
+        <div style="color:var(--text3)">${b.date} ${b.time} · ${b.txCount} sales</div>
+        ${b.note?`<div style="color:var(--text2);font-style:italic;font-size:11px">${b.note}</div>`:''}
+        ${clearedInfo}
+      </div>
+      <div style="text-align:right"><div style="color:var(--text3);font-size:10px">Expected</div><div style="font-weight:500">${fmt(b.expected)}</div></div>
+      <div style="text-align:right"><div style="color:var(--text3);font-size:10px">Submitted</div><div style="font-weight:500">${fmt(b.submitted)}</div></div>
+      <div><span class="badge ${sc}">${b.cleared?'✓ Cleared · ':'' }${diffTxt}</span></div>
+      <div>${clearBtn}</div>
+    </div>`;
+  });
+  hist.innerHTML=h;
+}
+
+// ─── MONTHLY (FIX #3: discrepancy impact on profit) ────────
+function changeMonth(d){viewMonth+=d;if(viewMonth<0){viewMonth=11;viewYear--;}if(viewMonth>11){viewMonth=0;viewYear++;}renderMonthly();}
+
+function renderMonthly(){
+  const filter=document.getElementById('monthRepFilter');
+  const uid=filter?filter.value:'';
+  const dt=(s)=>{const d=new Date(s.date);return d.getMonth()===viewMonth&&d.getFullYear()===viewYear};
+  let sales=loadSales().filter(dt);
+  if(uid)sales=sales.filter(s=>s.uid===uid);
+  const rev=sales.reduce((a,s)=>a+s.revenue,0);
+  const cost=sales.reduce((a,s)=>a+s.cost,0);
+  const grossProfit=rev-cost;
+
+  // discrepancies for this month
+  const monthBalances=loadBalances().filter(b=>{const d=new Date(b.date);return d.getMonth()===viewMonth&&d.getFullYear()===viewYear&&b.status!=='balanced'});
+  const totalShort=monthBalances.filter(b=>b.status==='short').reduce((a,b)=>a+Math.abs(b.diff),0);
+  const totalOver=monthBalances.filter(b=>b.status==='over').reduce((a,b)=>a+b.diff,0);
+  const unclearedShort=monthBalances.filter(b=>b.status==='short'&&!b.cleared).reduce((a,b)=>a+Math.abs(b.diff),0);
+  const unclearedOver=monthBalances.filter(b=>b.status==='over'&&!b.cleared).reduce((a,b)=>a+b.diff,0);
+  // adjusted profit: subtract losses (shorts), add overs (that are verified)
+  const adjustedProfit=grossProfit - unclearedShort + unclearedOver;
+
+  document.getElementById('monthTitle').textContent=MONTHS[viewMonth]+' '+viewYear;
+  document.getElementById('monthMetrics').innerHTML=`
+    <div class="metric"><div class="metric-label">Total sales</div><div class="metric-val">${sales.length}</div></div>
+    <div class="metric"><div class="metric-label">Revenue</div><div class="metric-val blue">${fmtN(rev)}</div></div>
+    <div class="metric"><div class="metric-label">Cost</div><div class="metric-val">${fmtN(cost)}</div></div>
+    <div class="metric"><div class="metric-label">Gross profit</div><div class="metric-val green">${fmtN(grossProfit)}</div></div>
+    <div class="metric"><div class="metric-label">Cash shorts (loss)</div><div class="metric-val red">−${fmtN(unclearedShort)}</div></div>
+    <div class="metric"><div class="metric-label">Cash overs (gain)</div><div class="metric-val amber">+${fmtN(unclearedOver)}</div></div>
+    <div class="metric"><div class="metric-label">Adjusted net profit</div><div class="metric-val accent">${fmtN(adjustedProfit)}</div></div>`;
+
+  const discCard=document.getElementById('monthDiscCard');
+  if(monthBalances.length){
+    discCard.style.display='block';
+    let dh='';
+    monthBalances.forEach(b=>{
+      const sc=b.status==='over'?'b-amber':'b-red';
+      const impact=b.status==='short'?`−${fmt(Math.abs(b.diff))} (loss)`:b.cleared?`+${fmt(b.diff)} (cleared)`:`+${fmt(b.diff)} (unverified)`;
+      dh+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px">
+        <div><strong style="font-weight:500">${b.uname}</strong> · ${b.date}<br><span style="color:var(--text3)">${b.note||''}</span>${b.cleared?`<br><span style="color:var(--green);font-size:10px">✓ Cleared by ${b.clearedBy}</span>`:''}</div>
+        <div style="text-align:right"><span class="badge ${sc}">${b.status}</span><br><span style="font-size:11px;color:var(--text3)">${impact}</span></div>
+      </div>`;
+    });
+    document.getElementById('monthDiscList').innerHTML=dh||'<div class="empty">No discrepancies</div>';
+  } else {discCard.style.display='none';}
+
+  renderSalesTable(sales,document.getElementById('monthTable'),false);
+}
+
+// ─── STOCK ─────────────────────────────────────────────────
+function addStock(){
+  const name=document.getElementById('sName').value.trim();
+  if(!name){showSnack('Enter a product name','error');return}
+  const cat=document.getElementById('sCat').value;
+  const qty=parseInt(document.getElementById('sQty').value)||0;
+  const reorder=parseInt(document.getElementById('sReorder').value)||2;
+  const cost=parseFloat(document.getElementById('sCost').value)||0;
+  const sell=parseFloat(document.getElementById('sSell').value)||0;
+  const isUpdate=loadStock().some(s=>s.name.toLowerCase()===name.toLowerCase());
+  requireSupervisor(
+    isUpdate?'Update Stock — Supervisor Required':'Add Stock Item — Supervisor Required',
+    isUpdate?'Editing an existing stock item requires supervisor authorisation.':'Adding a new stock item requires supervisor authorisation.',
+    ()=>{
+      const stock=loadStock();
+      const idx=stock.findIndex(s=>s.name.toLowerCase()===name.toLowerCase());
+      if(idx>=0){stock[idx]={...stock[idx],cat,qty,reorder,cost,sell};showSnack('Stock updated: '+name);}
+      else{stock.push({id:'I'+(Date.now().toString().slice(-5)),name,cat,qty,reorder,cost,sell,added:today()});showSnack('Added: '+name);}
+      saveStock(stock);
+      ['sName','sCost','sSell'].forEach(i=>document.getElementById(i).value='');
+      document.getElementById('sQty').value=1;document.getElementById('sReorder').value=2;
+      updateReorderBadge();renderStockMetrics();renderStockTable('');
+    }
+  );
+}
+
+function deleteStock(id){
+  requireSupervisor(
+    'Remove Stock Item — Supervisor Required',
+    'Removing a stock item requires supervisor authorisation.',
+    ()=>{
+      saveStock(loadStock().filter(s=>s.id!==id));
+      updateReorderBadge();renderStockMetrics();renderStockTable('');showSnack('Removed','warn');
+    }
+  );
+}
+
+function adjustStock(id,delta){
+  requireSupervisor(
+    'Adjust Stock — Supervisor Required',
+    `Manually ${delta>0?'adding to':'removing from'} stock requires supervisor authorisation.`,
+    ()=>{
+      const stock=loadStock();const idx=stock.findIndex(s=>s.id===id);if(idx<0)return;
+      stock[idx].qty=Math.max(0,stock[idx].qty+delta);saveStock(stock);
+      updateReorderBadge();renderStockTable('');renderStockMetrics();renderReorder();
+      showSnack(delta>0?'+1 added':'-1 removed');
+    }
+  );
+}
+
+function restock(id){
+  const input=document.getElementById('ro_'+id);const qty=parseInt(input.value);
+  if(!qty||qty<1){showSnack('Enter a quantity','error');return}
+  requireSupervisor(
+    'Restock Item — Supervisor Required',
+    'Adding stock quantities requires supervisor authorisation.',
+    ()=>{
+      const stock=loadStock();const idx=stock.findIndex(s=>s.id===id);if(idx<0)return;
+      stock[idx].qty+=qty;saveStock(stock);
+      showSnack(`${stock[idx].name} +${qty} (now ${stock[idx].qty})`);
+      updateReorderBadge();renderReorder();renderStockTable('');renderStockMetrics();
+    }
+  );
+}
+
+function renderStockMetrics(){
+  const stock=loadStock();
+  const val=stock.reduce((a,s)=>a+s.cost*s.qty,0);
+  const low=stock.filter(s=>s.qty>0&&s.qty<=s.reorder).length;
+  const out=stock.filter(s=>s.qty<=0).length;
+  document.getElementById('stockMetrics').innerHTML=`
+    <div class="metric"><div class="metric-label">Items tracked</div><div class="metric-val">${stock.length}</div></div>
+    <div class="metric"><div class="metric-label">Stock value</div><div class="metric-val blue">${fmtN(val)}</div></div>
+    <div class="metric"><div class="metric-label">Low stock</div><div class="metric-val amber">${low}</div></div>
+    <div class="metric"><div class="metric-label">Out of stock</div><div class="metric-val red">${out}</div></div>`;
+}
+
+function sbar(qty,reorder){
+  const max=Math.max(qty,(reorder||2)*3,1);const pct=Math.round((qty/max)*100);
+  const col=qty<=0?'var(--red)':qty<=reorder?'var(--amber)':'var(--green)';
+  return `<div class="sbar-wrap"><div class="sbar" style="width:${pct}%;background:${col}"></div></div>`;
+}
+
+function renderStockTable(filter){
+  const stock=loadStock().filter(s=>!filter||s.name.toLowerCase().includes(filter.toLowerCase())||s.cat.toLowerCase().includes(filter.toLowerCase()));
+  const el=document.getElementById('stockTable');
+  if(!stock.length){el.innerHTML='<div class="empty">No stock items yet</div>';return}
+  let h='<table><thead><tr><th style="width:24%">Product</th><th style="width:11%">Category</th><th style="width:16%">Level</th><th style="width:9%">Cost</th><th style="width:9%">Sell</th><th style="width:11%">Status</th><th style="width:20%">Actions</th></tr></thead><tbody>';
+  stock.forEach(s=>{
+    const st=s.qty<=0?['b-red','Out of stock']:s.qty<=s.reorder?['b-amber','Low stock']:['b-green','In stock'];
+    h+=`<tr><td title="${s.name}" style="font-weight:500">${s.name}</td><td><span class="badge b-gray">${s.cat}</span></td><td>${sbar(s.qty,s.reorder)} <span style="font-size:11px;margin-left:6px;color:var(--text2)">${s.qty} / min ${s.reorder}</span></td><td style="font-family:'DM Mono',monospace">${fmt(s.cost)}</td><td style="font-family:'DM Mono',monospace">${fmt(s.sell)}</td><td><span class="badge ${st[0]}">${st[1]}</span></td><td style="white-space:nowrap"><button class="btn-sm" onclick="adjustStock('${s.id}',-1)"><i class="ti ti-minus"></i></button> <button class="btn-sm success" onclick="adjustStock('${s.id}',1)" style="margin:0 3px"><i class="ti ti-plus"></i></button> <button class="btn-sm danger" onclick="deleteStock('${s.id}')"><i class="ti ti-trash"></i></button></td></tr>`;
+  });
+  h+='</tbody></table>';el.innerHTML=h;
+}
+
+function renderReorder(){
+  const stock=loadStock();
+  const low=stock.filter(s=>s.qty>0&&s.qty<=s.reorder);
+  const out=stock.filter(s=>s.qty<=0);
+  const el=document.getElementById('reorderContent');
+  if(!low.length&&!out.length){el.innerHTML='<div class="card"><div style="text-align:center;padding:3rem;color:var(--text3)"><i class="ti ti-circle-check" style="font-size:32px;display:block;margin-bottom:12px;color:var(--green)"></i>All items well stocked.</div></div>';return}
+  let h='';
+  if(out.length){
+    h+=`<div class="reorder-box ro-danger"><div class="ro-title" style="color:var(--red)"><i class="ti ti-alert-triangle"></i> Out of stock — ${out.length} item(s) — order immediately</div>`;
+    out.forEach(s=>{h+=`<div class="ro-item"><span><strong>${s.name}</strong> <span class="badge b-gray" style="margin-left:6px">${s.cat}</span></span><span style="color:var(--text2)">Cost ${fmt(s.cost)} · Sell ${fmt(s.sell)}</span></div>`;});
+    h+='</div>';
+  }
+  if(low.length){
+    h+=`<div class="reorder-box ro-warn"><div class="ro-title" style="color:var(--amber)"><i class="ti ti-bell"></i> Low stock — ${low.length} item(s) — reorder soon</div>`;
+    low.forEach(s=>{h+=`<div class="ro-item"><span><strong>${s.name}</strong></span><span style="color:var(--text2)">${s.qty} left (min ${s.reorder}) · Cost ${fmt(s.cost)}</span></div>`;});
+    h+='</div>';
+  }
+  h+=`<div class="card"><div class="card-head"><div class="card-title">Restock items</div></div>`;
+  [...out,...low].forEach(s=>{
+    h+=`<div class="restock-row"><span style="font-weight:500">${s.name} <span style="color:var(--text3);font-weight:400">(${s.qty} in stock)</span></span><input type="number" id="ro_${s.id}" placeholder="Qty to add" min="1" style="width:110px;font-size:12px;padding:6px 10px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text)"><button class="btn-sm success" onclick="restock('${s.id}')"><i class="ti ti-plus"></i> Restock</button></div>`;
+  });
+  h+='</div>';el.innerHTML=h;
+}
+
+function updateReorderBadge(){
+  const n=loadStock().filter(s=>s.qty<=s.reorder).length;
+  const b=document.getElementById('reorderBadge');
+  b.textContent=n;b.style.display=n>0?'inline':'none';
+}
+
+// ─── ALL REPORTS (ADMIN) ────────────────────────────────────
+function changeMonth2(d){viewMonth2+=d;if(viewMonth2<0){viewMonth2=11;viewYear2--;}if(viewMonth2>11){viewMonth2=0;viewYear2++;}renderAllReports();}
+
+function renderAllReports(){
+  const allSales=loadSales().filter(s=>{const dt=new Date(s.date);return dt.getMonth()===viewMonth2&&dt.getFullYear()===viewYear2;});
+  const users=loadUsers();
+  document.getElementById('monthTitle2').textContent=MONTHS[viewMonth2]+' '+viewYear2;
+  const rev=allSales.reduce((a,s)=>a+s.revenue,0);
+  const cost=allSales.reduce((a,s)=>a+s.cost,0);
+  document.getElementById('allRepMetrics').innerHTML=`
+    <div class="metric"><div class="metric-label">Total sales</div><div class="metric-val">${allSales.length}</div></div>
+    <div class="metric"><div class="metric-label">Revenue</div><div class="metric-val blue">${fmtN(rev)}</div></div>
+    <div class="metric"><div class="metric-label">Cost</div><div class="metric-val">${fmtN(cost)}</div></div>
+    <div class="metric"><div class="metric-label">Net profit</div><div class="metric-val green">${fmtN(rev-cost)}</div></div>`;
+  let h='<table><thead><tr><th>Rep</th><th>Sales</th><th>Revenue</th><th>Cost</th><th>Profit</th><th>Margin</th></tr></thead><tbody>';
+  users.forEach(u=>{
+    const us=allSales.filter(s=>s.uid===u.id);if(!us.length)return;
+    const r=us.reduce((a,s)=>a+s.revenue,0);const c=us.reduce((a,s)=>a+s.cost,0);const p=r-c;
+    const margin=r>0?((p/r)*100).toFixed(1):0;
+    h+=`<tr><td style="font-weight:500">${u.name} <span class="badge b-gray" style="margin-left:4px">${u.role}</span></td><td>${us.length}</td><td style="font-family:'DM Mono',monospace">${fmtN(r)}</td><td style="font-family:'DM Mono',monospace">${fmtN(c)}</td><td><span class="badge ${p>=0?'b-green':'b-red'}">${p>=0?'+':''}${fmtN(p)}</span></td><td>${margin}%</td></tr>`;
+  });
+  h+='</tbody></table>';document.getElementById('repPerfTable').innerHTML=h;
+  renderSalesTable(allSales,document.getElementById('allTxTable'),false);
+}
+
+// ─── USERS ─────────────────────────────────────────────────
+function renderUsers(){
+  const users=loadUsers();
+  document.getElementById('usersList').innerHTML=users.map(u=>`
+    <div class="user-card">
+      <div class="ua-left">
+        <div class="ua-avatar" style="background:${u.role==='admin'?'rgba(160,100,255,.15)':'rgba(0,200,150,.12)'};color:${u.role==='admin'?'#a064ff':'var(--green)'};">${initials(u.name)}</div>
+        <div><div class="ua-name">${u.name}</div><div class="ua-meta">@${u.username} · ${u.role==='admin'?'Administrator':'Sales rep'} ${u.active===false?'· <span style="color:var(--red)">Disabled</span>':''}</div></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="badge ${u.role==='admin'?'b-purple':'b-green'}">${u.role}</span>
+        ${u.id!=='u1'?`<button class="btn-sm ${u.active===false?'success':'danger'}" onclick="toggleUser('${u.id}')">${u.active===false?'Enable':'Disable'}</button>`:''}
+        ${u.id!=='u1'&&u.id!==currentUser.id?`<button class="btn-sm danger" onclick="deleteUser('${u.id}')"><i class="ti ti-trash"></i></button>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function addUser(){
+  const name=document.getElementById('uName').value.trim();
+  const username=document.getElementById('uUser').value.trim().toLowerCase();
+  const password=document.getElementById('uPass').value;
+  const role=document.getElementById('uRole').value;
+  if(!name||!username||!password){showSnack('Fill in all fields','error');return}
+  const users=loadUsers();
+  if(users.find(u=>u.username===username)){showSnack('Username already exists','error');return}
+  users.push({id:'u'+(Date.now().toString().slice(-5)),name,username,password,role,active:true});
+  lsSave('ts_users',users);
+  ['uName','uUser','uPass'].forEach(i=>document.getElementById(i).value='');
+  showSnack('User created: '+name);renderUsers();
+}
+
+function toggleUser(id){
+  const users=loadUsers();const idx=users.findIndex(u=>u.id===id);if(idx<0)return;
+  users[idx].active=!users[idx].active;lsSave('ts_users',users);renderUsers();
+  showSnack(users[idx].active?'User enabled':'User disabled','warn');
+}
+
+function deleteUser(id){
+  if(!confirm('Delete this user?'))return;
+  lsSave('ts_users',loadUsers().filter(u=>u.id!==id));renderUsers();showSnack('User deleted','warn');
+}
+
+function printDaily(){
+  const sales=loadSales().filter(s=>s.date===today());
+  const rev=sales.reduce((a,s)=>a+s.revenue,0),cost=sales.reduce((a,s)=>a+s.cost,0);
+  const rows=sales.map(s=>`${s.time}\t${s.id}\t${s.product}\t${s.qty}\t${fmt(s.buy)}\t${fmt(s.sell)}\t${fmt(s.profit)}\t${s.uname}\t${s.customer||'Walk-in'}`).join('\n');
+  const report=`DAILY REPORT — ${today()}\n${'='.repeat(65)}\nTime\tRef\tProduct\tQty\tBuy\tSell\tProfit\tRep\tCustomer\n${rows}\n${'='.repeat(65)}\nRevenue: ${fmt(rev)}  Cost: ${fmt(cost)}  Profit: ${fmt(rev-cost)}\nTotal: ${sales.length}`;
+  const w=window.open('','_blank');if(w){w.document.write('<pre style="font:13px monospace;padding:24px;background:#fff;color:#000">'+report+'</pre>');w.print();}
+}
+
+// ─── DAILY RESET (start fresh each day) ────────────────────
+// Each day's data is already stored by date — we don't wipe sales/stock/balances.
+// "Fresh start" just means: clear the active balance draft & cashflow of a previous day
+// so Balance page shows $0 when opened on a new day. Data is always retained for reporting.
+function checkDayRollover(){
+  const lastDay=localStorage.getItem('ts_last_day');
+  const td=today();
+  if(lastDay && lastDay!==td){
+    // New day — remove any stale in-progress draft (not submitted balances — those stay)
+    localStorage.removeItem('ts_balance_draft');
+  }
+  localStorage.setItem('ts_last_day',td);
+}
+
+// ─── SUMMARY PANEL ─────────────────────────────────────────
+let sumMode='today'; // today | yesterday | week | month | custom
+
+function setSumQuick(mode){
+  sumMode=mode;
+  const idMap={today:'sqToday',yesterday:'sqYest',week:'sqWeek',month:'sqMonth',custom:'sqCustom'};
+  Object.keys(idMap).forEach(m=>{
+    const btn=document.getElementById(idMap[m]);
+    if(btn)btn.className='btn-sm'+(m===mode?' active-quick':'');
+  });
+  const cr=document.getElementById('sumCustomRange');
+  cr.style.display=mode==='custom'?'flex':'none';
+  if(mode!=='custom')renderSummary();
+}
+
+function sumDateRange(){
+  const td=today();
+  const dt=(offset)=>{const d=new Date();d.setDate(d.getDate()+offset);return d.toISOString().slice(0,10)};
+  if(sumMode==='today')return[td,td];
+  if(sumMode==='yesterday'){const y=dt(-1);return[y,y];}
+  if(sumMode==='week')return[dt(-6),td];
+  if(sumMode==='month'){
+    const d=new Date();
+    return[`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`,td];
+  }
+  if(sumMode==='custom'){
+    const from=document.getElementById('sumFrom').value;
+    const to=document.getElementById('sumTo').value;
+    if(from&&to)return[from,to];
+    return[td,td];
+  }
+  return[td,td];
+}
+
+function inRange(dateStr,from,to){return dateStr>=from&&dateStr<=to;}
+
+function periodLabel(from,to){
+  if(from===to){
+    if(from===today())return'Today — '+new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const y=new Date();y.setDate(y.getDate()-1);
+    if(from===y.toISOString().slice(0,10))return'Yesterday — '+new Date(from).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    return new Date(from).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  }
+  return`${new Date(from).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})} → ${new Date(to).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}`;
+}
+
+function renderSummary(){
+  const [from,to]=sumDateRange();
+  const uid=(document.getElementById('sumRepFilter')||{}).value||'';
+
+  // filter datasets
+  let sales=loadSales().filter(s=>inRange(s.date,from,to));
+  if(uid)sales=sales.filter(s=>s.uid===uid);
+
+  let cf=loadCashFlow().filter(c=>inRange(c.date,from,to));
+  if(uid)cf=cf.filter(c=>c.uid===uid);
+
+  let bals=loadBalances().filter(b=>inRange(b.date,from,to));
+  if(uid)bals=bals.filter(b=>b.uid===uid);
+
+  const discs=bals.filter(b=>b.status!=='balanced');
+
+  // aggregates
+  const rev=sales.reduce((a,s)=>a+s.revenue,0);
+  const cost=sales.reduce((a,s)=>a+s.cost,0);
+  const grossProfit=rev-cost;
+  const income=cf.filter(c=>c.type==='income').reduce((a,c)=>a+c.amount,0);
+  const expense=cf.filter(c=>c.type==='expense').reduce((a,c)=>a+c.amount,0);
+  const ecoIn=cf.filter(c=>c.type==='ecocash_in').reduce((a,c)=>a+c.amount,0);
+  const ecoOut=cf.filter(c=>c.type==='ecocash_out').reduce((a,c)=>a+c.amount,0);
+  const zbIn=cf.filter(c=>c.type==='zb_in').reduce((a,c)=>a+c.amount,0);
+  const zbOut=cf.filter(c=>c.type==='zb_out').reduce((a,c)=>a+c.amount,0);
+  const totalExpected=bals.reduce((a,b)=>a+b.expected,0);
+  const totalSubmitted=bals.reduce((a,b)=>a+b.submitted,0);
+  const unclearedShort=discs.filter(d=>d.status==='short'&&!d.cleared).reduce((a,d)=>a+Math.abs(d.diff),0);
+  const unclearedOver=discs.filter(d=>d.status==='over'&&!d.cleared).reduce((a,d)=>a+d.diff,0);
+  const adjProfit=grossProfit-unclearedShort+unclearedOver;
+  const margin=rev>0?((grossProfit/rev)*100).toFixed(1):'0.0';
+
+  // period label
+  document.getElementById('sumPeriodLabel').textContent=periodLabel(from,to);
+
+  // metrics
+  document.getElementById('sumMetrics').innerHTML=`
+    <div class="metric"><div class="metric-label">Transactions</div><div class="metric-val">${sales.length}</div></div>
+    <div class="metric"><div class="metric-label">Revenue</div><div class="metric-val blue">${fmtN(rev)}</div></div>
+    <div class="metric"><div class="metric-label">Cost of goods</div><div class="metric-val">${fmtN(cost)}</div></div>
+    <div class="metric"><div class="metric-label">Gross profit</div><div class="metric-val green">${fmtN(grossProfit)}</div></div>
+    <div class="metric"><div class="metric-label">Margin</div><div class="metric-val">${margin}%</div></div>
+    <div class="metric"><div class="metric-label">Cash adjustments</div><div class="metric-val ${unclearedShort>0?'red':'green'}">${unclearedShort>0?'−'+fmtN(unclearedShort):'+'+fmtN(unclearedOver)}</div></div>
+    <div class="metric"><div class="metric-label">Adjusted profit</div><div class="metric-val accent">${fmtN(adjProfit)}</div></div>
+    <div class="metric"><div class="metric-label">Balance submissions</div><div class="metric-val">${bals.length}</div></div>`;
+
+  // sales by category
+  const byCat={};
+  sales.forEach(s=>{if(!byCat[s.cat])byCat[s.cat]={count:0,rev:0,profit:0};byCat[s.cat].count+=s.qty;byCat[s.cat].rev+=s.revenue;byCat[s.cat].profit+=s.profit;});
+  let saleH='';
+  if(Object.keys(byCat).length){
+    saleH='<table><thead><tr><th>Category</th><th>Units</th><th>Revenue</th><th>Profit</th></tr></thead><tbody>';
+    Object.entries(byCat).sort((a,b)=>b[1].rev-a[1].rev).forEach(([cat,d])=>{
+      saleH+=`<tr><td style="font-weight:500">${cat}</td><td>${d.count}</td><td style="font-family:'DM Mono',monospace">${fmtN(d.rev)}</td><td><span class="badge ${d.profit>=0?'b-green':'b-red'}">${d.profit>=0?'+':''}${fmtN(d.profit)}</span></td></tr>`;
+    });
+    saleH+='</tbody></table>';
+  } else {saleH='<div class="empty" style="padding:1rem">No sales in this period</div>';}
+  document.getElementById('sumSalesList').innerHTML=saleH;
+  document.getElementById('sumSalesCount').textContent=sales.length+' sale(s) · '+Object.keys(byCat).length+' categories';
+
+  // balance reconciliation rows
+  let balH='';
+  if(bals.length){
+    bals.forEach(b=>{
+      const sc=b.status==='balanced'?'b-green':b.status==='over'?'b-amber':'b-red';
+      const diffTxt=b.status==='balanced'?'Balanced':b.status==='over'?`+${fmt(b.diff)}`:`${fmt(b.diff)}`;
+      balH+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px">
+        <div><strong style="font-weight:500">${b.uname}</strong><div style="color:var(--text3)">${b.date} ${b.time}</div>${b.note?`<div style="color:var(--text2);font-style:italic">${b.note}</div>`:''}</div>
+        <div style="text-align:right">
+          <div style="color:var(--text3);font-size:10px">Expected → Submitted</div>
+          <div style="font-size:12px">${fmt(b.expected)} → ${fmt(b.submitted)}</div>
+          <span class="badge ${sc}">${diffTxt}</span>
+          ${b.cleared?`<div style="font-size:10px;color:var(--green)">✓ Cleared</div>`:''}
+        </div>
+      </div>`;
+    });
+    // totals row
+    const totalDiff=totalSubmitted-totalExpected;
+    balH+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;font-size:13px;font-weight:600;border-top:1px solid var(--border2);margin-top:4px">
+      <span>Period total</span>
+      <span style="color:${Math.abs(totalDiff)<0.01?'var(--green)':totalDiff>0?'var(--amber)':'var(--red)'}">${Math.abs(totalDiff)<0.01?'Exact':totalDiff>0?`+${fmt(totalDiff)}`:fmt(totalDiff)}</span>
+    </div>`;
+  } else {balH='<div class="empty" style="padding:1rem">No balance submissions in this period</div>';}
+  document.getElementById('sumBalList').innerHTML=balH;
+
+  // cash flow summary
+  let cfH='';
+  if(cf.length){
+    const cfGroups=[
+      {label:'Income injected',val:income,col:'var(--green)',sign:'+'},
+      {label:'Expenses / payouts',val:expense,col:'var(--red)',sign:'−'},
+      {label:'EcoCash in',val:ecoIn,col:'var(--blue)',sign:'+'},
+      {label:'EcoCash out',val:ecoOut,col:'var(--blue)',sign:'−'},
+      {label:'ZB in',val:zbIn,col:'var(--blue)',sign:'+'},
+      {label:'ZB out',val:zbOut,col:'var(--blue)',sign:'−'},
+    ].filter(g=>g.val>0);
+    cfH=cfGroups.map(g=>`<div class="bal-row"><span style="color:var(--text2)">${g.label}</span><span style="color:${g.col};font-weight:600">${g.sign}${fmtN(g.val)}</span></div>`).join('');
+    cfH+=`<div class="bal-row"><span style="font-weight:600">Net cash effect</span><span style="font-weight:600;color:${income-expense-ecoIn-zbIn>=0?'var(--green)':'var(--red)'}">${fmtN(income-expense-ecoIn-zbIn)}</span></div>`;
+  } else {cfH='<div class="empty" style="padding:1rem">No cash flow entries</div>';}
+  document.getElementById('sumCFList').innerHTML=cfH;
+
+  // discrepancies
+  const discCard=document.getElementById('sumDiscCard');
+  if(discs.length){
+    discCard.style.display='block';
+    let dH='';
+    discs.forEach(d=>{
+      const sc=d.status==='over'?'b-amber':'b-red';
+      dH+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px">
+        <div><strong style="font-weight:500">${d.uname}</strong> · ${d.date}<br><span style="color:var(--text3)">${d.note||'—'}</span>${d.cleared?`<br><span style="color:var(--green);font-size:10px">✓ Cleared by ${d.clearedBy}</span>`:''}</div>
+        <div style="text-align:right"><span class="badge ${sc}">${d.status}</span><br><span style="font-size:11px;color:var(--text3)">${d.status==='short'?'−'+fmt(Math.abs(d.diff)):'+'+fmt(d.diff)}</span></div>
+      </div>`;
+    });
+    document.getElementById('sumDiscList').innerHTML=dH;
+  } else {discCard.style.display='none';}
+
+  // full transaction table
+  renderSalesTable(sales,document.getElementById('sumTxTable'),false);
+}
+
+function printSummary(){
+  const [from,to]=sumDateRange();
+  const uid=(document.getElementById('sumRepFilter')||{}).value||'';
+  let sales=loadSales().filter(s=>inRange(s.date,from,to));
+  if(uid)sales=sales.filter(s=>s.uid===uid);
+  let bals=loadBalances().filter(b=>inRange(b.date,from,to));
+  if(uid)bals=bals.filter(b=>b.uid===uid);
+  const rev=sales.reduce((a,s)=>a+s.revenue,0);
+  const cost=sales.reduce((a,s)=>a+s.cost,0);
+  const profit=rev-cost;
+  const rows=sales.map(s=>`${s.date} ${s.time}\t${s.id}\t${s.product}\t${s.qty}\t${fmt(s.buy)}\t${fmt(s.sell)}\t${fmt(s.profit)}\t${s.uname}`).join('\n');
+  const balRows=bals.map(b=>`${b.date} ${b.time}\t${b.uname}\tExpected:${fmt(b.expected)}\tSubmitted:${fmt(b.submitted)}\t${b.status}`).join('\n');
+  const rpt=`SUMMARY REPORT — ${periodLabel(from,to)}\n${'='.repeat(70)}\nRevenue: ${fmt(rev)}   Cost: ${fmt(cost)}   Profit: ${fmt(profit)}\nSales: ${sales.length}\n\nTRANSACTIONS\nDate/Time\tRef\tProduct\tQty\tBuy\tSell\tProfit\tRep\n${rows}\n\nBALANCE SUBMISSIONS\nDate/Time\tRep\tExpected\tSubmitted\tStatus\n${balRows}\n${'='.repeat(70)}`;
+  const w=window.open('','_blank');if(w){w.document.write('<pre style="font:13px monospace;padding:24px;background:#fff;color:#000">'+rpt+'</pre>');w.print();}
+}
+
+// ─── BOOT ──────────────────────────────────────────────────
+initUsers();
+checkDayRollover();
+document.getElementById('tbDate').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
+updateCFTypeHint();
+
+// restore session on page load/refresh
+const restoredUser=restoreSession();
+if(restoredUser){bootApp(restoredUser);}
+</script>
+</body>
+</html>

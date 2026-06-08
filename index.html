@@ -310,12 +310,12 @@ tr:hover td{background:var(--surface2)}
     <div class="lfield"><label>Password</label><input id="lPass" type="password" placeholder="Enter password"></div>
     <div class="login-err" id="loginErr">Invalid username or password</div>
     <button class="btn-login" onclick="doLogin()">Sign in</button>
-    <div class="demo-hint">
+    <!-- <div class="demo-hint">
       <strong>Demo accounts:</strong><br>
       admin / admin123 (admin — system config only)<br>
       supervisor / super123 (supervisor — can authorise)<br>
       sarah / pass123 · james / pass123 (sales reps)
-    </div>
+    </div> -->
   </div>
 </div>
 
@@ -454,7 +454,7 @@ tr:hover td{background:var(--surface2)}
             <div class="field">
               <label>Type</label>
               <select id="cfType" onchange="updateCFTypeHint()">
-                <option value="expense">Expense / Money sent to manager</option>
+                <option value="expense">Expense / Money extracted</option>
                 <option value="income">Income / Money injected</option>
                 <option value="ecocash_in">EcoCash received (as change)</option>
                 <option value="ecocash_out">EcoCash paid out</option>
@@ -481,7 +481,7 @@ tr:hover td{background:var(--surface2)}
           <div class="bal-row"><span style="color:var(--text2)">Sales revenue (my sales today)</span><span id="balSales" style="font-weight:600">$0.00</span></div>
           <div class="bal-row"><span style="color:var(--text2)">Cost of goods</span><span id="balCost" style="color:var(--red);font-weight:600">−$0.00</span></div>
           <div class="bal-row"><span style="color:var(--text2)">Income injections today</span><span id="balIncome" style="color:var(--green);font-weight:600">+$0.00</span></div>
-          <div class="bal-row"><span style="color:var(--text2)">Expenses / Manager payouts</span><span id="balExpense" style="color:var(--red);font-weight:600">−$0.00</span></div>
+          <div class="bal-row"><span style="color:var(--text2)">Expenses / Money extracted</span><span id="balExpense" style="color:var(--red);font-weight:600">−$0.00</span></div>
           <div class="bal-row"><span style="color:var(--text2)">EcoCash net (in − out)</span><span id="balEco" style="font-weight:600">$0.00</span></div>
           <div class="bal-row"><span style="color:var(--text2)">ZB net (in − out)</span><span id="balZB" style="font-weight:600">$0.00</span></div>
           <div class="bal-row"><span style="font-weight:500">Expected cash in hand</span><span id="balOwner" class="bal-total">$0.00</span></div>
@@ -1119,7 +1119,7 @@ function renderDaily(){
 
 // ─── CASH FLOW (FIX #4) ────────────────────────────────────
 const CF_LABELS={
-  expense:'Expense / Manager payout',
+  expense:'Expense / Money extracted',
   income:'Income injection',
   ecocash_in:'EcoCash received',
   ecocash_out:'EcoCash paid out',
@@ -1127,7 +1127,7 @@ const CF_LABELS={
   zb_out:'ZB paid out'
 };
 const CF_HINTS={
-  expense:'Money paid out or handed to the manager mid-day. This reduces your cash balance.',
+  expense:'Money paid out. This reduces your cash balance.',
   income:'Money added from an external source (owner injection, etc). This increases your cash balance.',
   ecocash_in:'Customer paid via EcoCash and you gave cash as change. EcoCash in, cash out — reduces cash.',
   ecocash_out:'You paid out EcoCash to someone. Cash balance unaffected; tracked for records.',

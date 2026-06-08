@@ -5,15 +5,15 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
---bg:#21141d;--surface:#181c27;--surface2:#1e2235;--surface3:#252a3d;
---accent:#c800b7;--accent2:#00a87e;--accent-dim:rgba(200,0,183,.12);
---red:#ff5b5b;--red-dim:rgba(255,91,91,.12);
---amber:#ffb547;--amber-dim:rgba(255,181,71,.12);
---blue:#4f9cf9;--blue-dim:rgba(79,156,249,.12);
---green:#00c896;--green-dim:rgba(0,200,150,.12);
---text:#e8eaf0;--text2:#ffffff;--text3:#c1c1c1;
---border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
---radius:10px;--radius-lg:14px;--radius-xl:18px;
+--bg:#0d1117;--surface:#161b22;--surface2:#21262d;--surface3:#2d333b;
+--accent:#7c5cbf;--accent-dim:rgba(124,92,191,.15);
+--red:#f85149;--red-dim:rgba(248,81,73,.12);
+--amber:#d29922;--amber-dim:rgba(210,153,34,.12);
+--blue:#388bfd;--blue-dim:rgba(56,139,253,.12);
+--green:#3fb950;--green-dim:rgba(63,185,80,.12);
+--text:#e6edf3;--text2:#cdd9e5;--text3:#768390;
+--border:rgba(240,246,252,.1);--border2:rgba(240,246,252,.18);
+--radius:8px;--radius-lg:12px;--radius-xl:16px;
 font-family:'DM Sans',sans-serif;
 }
 body{background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
@@ -210,6 +210,39 @@ tr:hover td{background:var(--surface2)}
 .snack-error{border-left:3px solid var(--red)}
 .snack-warn{border-left:3px solid var(--amber)}
 
+/* ── AUDIT LOG ─────────────────────────────────────────────── */
+.al-item{display:flex;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border);font-size:12px;align-items:flex-start;transition:background .1s}
+.al-item:last-child{border-bottom:none}
+.al-item:hover{background:var(--surface2)}
+.al-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.al-dot.sale{background:var(--green)}
+.al-dot.sale-del{background:var(--red)}
+.al-dot.stock-add{background:var(--blue)}
+.al-dot.stock-edit{background:var(--amber)}
+.al-dot.stock-del{background:var(--red)}
+.al-dot.stock-adj{background:var(--amber)}
+.al-dot.restock{background:var(--green)}
+.al-dot.balance{background:var(--accent)}
+.al-dot.disc{background:var(--red)}
+.al-dot.disc-clear{background:var(--green)}
+.al-dot.cashflow{background:var(--blue)}
+.al-dot.cashflow-del{background:var(--red)}
+.al-dot.login{background:var(--text3)}
+.al-dot.user-add{background:var(--green)}
+.al-dot.user-del{background:var(--red)}
+.al-dot.user-tog{background:var(--amber)}
+.al-dot.disc-clear{background:var(--green)}
+.al-body{flex:1;min-width:0}
+.al-action{font-weight:600;color:var(--text);margin-bottom:2px}
+.al-detail{color:var(--text3);line-height:1.4;word-break:break-word}
+.al-meta{font-size:10px;color:var(--text3);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap}
+.al-meta span{background:var(--surface2);padding:1px 6px;border-radius:4px}
+.al-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+.al-filter-btn{font-size:11px;padding:4px 10px;border:1px solid var(--border2);background:transparent;border-radius:20px;cursor:pointer;color:var(--text2);transition:all .15s}
+.al-filter-btn:hover{background:var(--surface2)}
+.al-filter-btn.on{background:var(--accent-dim);border-color:rgba(200,0,183,.3);color:var(--accent)}
+
+/* ── EXISTING ──────────────────────────────────────────────── */
 .disc-hist-item{padding:10px 12px;background:var(--surface2);border-radius:var(--radius);margin-bottom:6px;display:grid;grid-template-columns:1fr auto auto auto auto;gap:12px;align-items:center;font-size:12px}
 
 /* SUPERVISOR MODAL */
@@ -277,12 +310,12 @@ tr:hover td{background:var(--surface2)}
     <div class="lfield"><label>Password</label><input id="lPass" type="password" placeholder="Enter password"></div>
     <div class="login-err" id="loginErr">Invalid username or password</div>
     <button class="btn-login" onclick="doLogin()">Sign in</button>
-    <!-- <div class="demo-hint">
+    <div class="demo-hint">
       <strong>Demo accounts:</strong><br>
-      admin / admin123 (superuser)<br>
-      sarah / pass123 (sales rep)<br>
-      james / pass123 (sales rep)
-    </div> -->
+      admin / admin123 (admin — system config only)<br>
+      supervisor / super123 (supervisor — can authorise)<br>
+      sarah / pass123 · james / pass123 (sales reps)
+    </div>
   </div>
 </div>
 
@@ -310,22 +343,28 @@ tr:hover td{background:var(--surface2)}
   <div class="layout">
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
     <div class="sidebar" id="sidebar">
-      <div class="nav-label">Sales</div>
-      <div class="nav-item active" onclick="switchTab('sell')" id="nav-sell"><i class="ti ti-receipt"></i> New sale</div>
-      <div class="nav-item" onclick="switchTab('daily')" id="nav-daily"><i class="ti ti-calendar-stats"></i> Today</div>
-      <div class="nav-item" onclick="switchTab('cashflow')" id="nav-cashflow"><i class="ti ti-arrows-exchange"></i> Cash Flow</div>
-      <div class="nav-item" onclick="switchTab('balance')" id="nav-balance"><i class="ti ti-coin"></i> Balance</div>
-      <div class="nav-label">Inventory</div>
-      <div class="nav-item" onclick="switchTab('stock')" id="nav-stock"><i class="ti ti-box"></i> Stock</div>
-      <div class="nav-item" onclick="switchTab('reorder')" id="nav-reorder"><i class="ti ti-bell"></i> Reorder <span class="nav-badge" id="reorderBadge" style="display:none"></span></div>
-      <div class="nav-label">Reports</div>
-      <div class="nav-item" onclick="switchTab('summary')" id="nav-summary"><i class="ti ti-file-report"></i> Day Summary</div>
-      <div class="nav-item" onclick="switchTab('monthly')" id="nav-monthly"><i class="ti ti-chart-bar"></i> Monthly</div>
-      <div class="nav-item" onclick="switchTab('discrepancy')" id="nav-discrepancy"><i class="ti ti-alert-triangle"></i> Discrepancies <span class="nav-badge" id="discBadge" style="display:none"></span></div>
+      <!-- Sales nav: shown to rep + supervisor only -->
+      <div id="salesNav">
+        <div class="nav-label">Sales</div>
+        <div class="nav-item active" onclick="switchTab('sell')" id="nav-sell"><i class="ti ti-receipt"></i> New sale</div>
+        <div class="nav-item" onclick="switchTab('daily')" id="nav-daily"><i class="ti ti-calendar-stats"></i> Today</div>
+        <div class="nav-item" onclick="switchTab('cashflow')" id="nav-cashflow"><i class="ti ti-arrows-exchange"></i> Cash Flow</div>
+        <div class="nav-item" onclick="switchTab('balance')" id="nav-balance"><i class="ti ti-coin"></i> Balance</div>
+        <div class="nav-label">Inventory</div>
+        <div class="nav-item" onclick="switchTab('stock')" id="nav-stock"><i class="ti ti-box"></i> Stock</div>
+        <div class="nav-item" onclick="switchTab('reorder')" id="nav-reorder"><i class="ti ti-bell"></i> Reorder <span class="nav-badge" id="reorderBadge" style="display:none"></span></div>
+        <div class="nav-label">Reports</div>
+        <div class="nav-item" onclick="switchTab('summary')" id="nav-summary"><i class="ti ti-file-report"></i> Day Summary</div>
+        <div class="nav-item" onclick="switchTab('monthly')" id="nav-monthly"><i class="ti ti-chart-bar"></i> Monthly</div>
+        <div class="nav-item" onclick="switchTab('discrepancy')" id="nav-discrepancy"><i class="ti ti-alert-triangle"></i> Discrepancies <span class="nav-badge" id="discBadge" style="display:none"></span></div>
+        <div class="nav-item" onclick="switchTab('auditlog')" id="nav-auditlog"><i class="ti ti-history"></i> Activity Log</div>
+      </div>
+      <!-- Admin nav: shown to admin only -->
       <div id="adminNav" style="display:none">
-        <div class="nav-label">Admin</div>
+        <div class="nav-label">Administration</div>
         <div class="nav-item" onclick="switchTab('users')" id="nav-users"><i class="ti ti-users"></i> Users</div>
-        <div class="nav-item" onclick="switchTab('allreports')" id="nav-allreports"><i class="ti ti-report-analytics"></i> All reports</div>
+        <div class="nav-item" onclick="switchTab('allreports')" id="nav-allreports"><i class="ti ti-report-analytics"></i> All Reports</div>
+        <div class="nav-item" onclick="switchTab('auditlog')" id="nav-auditlog-admin"><i class="ti ti-history"></i> Activity Log</div>
       </div>
     </div>
     <div class="main">
@@ -415,7 +454,7 @@ tr:hover td{background:var(--surface2)}
             <div class="field">
               <label>Type</label>
               <select id="cfType" onchange="updateCFTypeHint()">
-                <option value="expense">Expense / Money extracted</option>
+                <option value="expense">Expense / Money sent to manager</option>
                 <option value="income">Income / Money injected</option>
                 <option value="ecocash_in">EcoCash received (as change)</option>
                 <option value="ecocash_out">EcoCash paid out</option>
@@ -424,7 +463,7 @@ tr:hover td{background:var(--surface2)}
               </select>
             </div>
             <div class="field"><label>Amount $</label><input id="cfAmount" type="number" placeholder="0.00" step="0.01" min="0"></div>
-            <div class="field"><label>Reference / Notes</label><input id="cfNote" type="text" placeholder="e.g. Bought shutter glass & pouch"></div>
+            <div class="field"><label>Reference / Notes</label><input id="cfNote" type="text" placeholder="e.g. Midday handover to manager"></div>
           </div>
           <div id="cfTypeHint" style="font-size:12px;color:var(--text3);margin-bottom:12px;padding:8px 12px;background:var(--surface2);border-radius:var(--radius)"></div>
           <button class="btn-primary" onclick="addCashFlow()" style="width:auto;padding:10px 24px"><i class="ti ti-plus"></i> Record entry</button>
@@ -442,7 +481,7 @@ tr:hover td{background:var(--surface2)}
           <div class="bal-row"><span style="color:var(--text2)">Sales revenue (my sales today)</span><span id="balSales" style="font-weight:600">$0.00</span></div>
           <div class="bal-row"><span style="color:var(--text2)">Cost of goods</span><span id="balCost" style="color:var(--red);font-weight:600">−$0.00</span></div>
           <div class="bal-row"><span style="color:var(--text2)">Income injections today</span><span id="balIncome" style="color:var(--green);font-weight:600">+$0.00</span></div>
-          <div class="bal-row"><span style="color:var(--text2)">Expenses / Money extracted</span><span id="balExpense" style="color:var(--red);font-weight:600">−$0.00</span></div>
+          <div class="bal-row"><span style="color:var(--text2)">Expenses / Manager payouts</span><span id="balExpense" style="color:var(--red);font-weight:600">−$0.00</span></div>
           <div class="bal-row"><span style="color:var(--text2)">EcoCash net (in − out)</span><span id="balEco" style="font-weight:600">$0.00</span></div>
           <div class="bal-row"><span style="color:var(--text2)">ZB net (in − out)</span><span id="balZB" style="font-weight:600">$0.00</span></div>
           <div class="bal-row"><span style="font-weight:500">Expected cash in hand</span><span id="balOwner" class="bal-total">$0.00</span></div>
@@ -578,6 +617,33 @@ tr:hover td{background:var(--surface2)}
         </div>
       </div>
 
+      <!-- ACTIVITY LOG -->
+      <div class="panel" id="panel-auditlog">
+        <div class="metrics" id="alMetrics"></div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Activity Log</div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="date" id="alFromDate" style="font-size:12px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text)" onchange="renderAuditLog()">
+              <span style="font-size:12px;color:var(--text3)">to</span>
+              <input type="date" id="alToDate" style="font-size:12px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text)" onchange="renderAuditLog()">
+              <select id="alRepFilter" style="font-size:12px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text)" onchange="renderAuditLog()"></select>
+            </div>
+          </div>
+          <!-- category filters -->
+          <div class="al-filters">
+            <button class="al-filter-btn on" data-cat="" onclick="alSetCat(this,'')">All</button>
+            <button class="al-filter-btn" data-cat="sale" onclick="alSetCat(this,'sale')">Sales</button>
+            <button class="al-filter-btn" data-cat="stock" onclick="alSetCat(this,'stock')">Stock</button>
+            <button class="al-filter-btn" data-cat="balance" onclick="alSetCat(this,'balance')">Balances</button>
+            <button class="al-filter-btn" data-cat="cashflow" onclick="alSetCat(this,'cashflow')">Cash Flow</button>
+            <button class="al-filter-btn" data-cat="user" onclick="alSetCat(this,'user')">Users</button>
+            <button class="al-filter-btn" data-cat="system" onclick="alSetCat(this,'system')">System</button>
+          </div>
+          <div id="alList"></div>
+        </div>
+      </div>
+
       <!-- DISCREPANCY -->
       <div class="panel" id="panel-discrepancy">
         <div class="metrics" id="discMetrics"></div>
@@ -595,7 +661,7 @@ tr:hover td{background:var(--surface2)}
             <div class="field"><label>Full name</label><input id="uName" type="text" placeholder="e.g. Grace Moyo"></div>
             <div class="field"><label>Username</label><input id="uUser" type="text" placeholder="e.g. grace"></div>
             <div class="field"><label>Password</label><input id="uPass" type="password" placeholder="Password"></div>
-            <div class="field"><label>Role</label><select id="uRole"><option value="rep">Sales rep</option><option value="admin">Admin</option></select></div>
+            <div class="field"><label>Role</label><select id="uRole"><option value="rep">Sales rep</option><option value="supervisor">Supervisor</option><option value="admin">Admin</option></select></div>
           </div>
           <button class="btn-primary" onclick="addUser()" style="width:auto;padding:10px 24px"><i class="ti ti-user-plus"></i> Create user</button>
         </div>
@@ -669,7 +735,8 @@ function initUsers(){
     lsSave('ts_users',[
       {id:'u1',name:'Admin',username:'admin',password:'admin123',role:'admin',active:true},
       {id:'u2',name:'Sarah Moyo',username:'sarah',password:'pass123',role:'rep',active:true},
-      {id:'u3',name:'James Dube',username:'james',password:'pass123',role:'rep',active:true}
+      {id:'u3',name:'James Dube',username:'james',password:'pass123',role:'rep',active:true},
+      {id:'u4',name:'Supervisor',username:'supervisor',password:'super123',role:'supervisor',active:true}
     ]);
   }
 }
@@ -684,16 +751,25 @@ function saveBalances(d){lsSave('ts_balances',d)}
 function loadCashFlow(){return lsArr('ts_cashflow')}
 function saveCashFlow(d){lsSave('ts_cashflow',d)}
 
-// ─── SESSION PERSISTENCE (FIX #1) ──────────────────────────
-function saveSession(user){lsSave('ts_session',{uid:user.id,time:Date.now()})}
-function clearSession(){localStorage.removeItem('ts_session')}
+// ─── SESSION PERSISTENCE ───────────────────────────────────
+// We save session so the tab doesn't drop you on a browser refresh (same tab).
+// On a fresh page load (Vercel / new visit), we intentionally show the login screen.
+// We detect "same tab refresh" vs "new navigation" using sessionStorage.
+function saveSession(user){
+  lsSave('ts_session',{uid:user.id,time:Date.now()});
+  sessionStorage.setItem('ts_tab_active','1'); // marks this tab as live
+}
+function clearSession(){
+  localStorage.removeItem('ts_session');
+  sessionStorage.removeItem('ts_tab_active');
+}
 function restoreSession(){
+  // Only restore if this browser tab was already active (not a fresh Vercel load)
+  if(!sessionStorage.getItem('ts_tab_active'))return false;
   const s=ls('ts_session');
   if(!s)return false;
-  // session expires after 12 hours
   if(Date.now()-s.time>12*60*60*1000){clearSession();return false}
-  const users=loadUsers();
-  const user=users.find(u=>u.id===s.uid&&u.active!==false);
+  const user=loadUsers().find(u=>u.id===s.uid&&u.active!==false);
   if(!user){clearSession();return false}
   return user;
 }
@@ -729,15 +805,25 @@ function bootApp(user){
   document.getElementById('appScreen').style.display='flex';
   document.getElementById('topAvatar').textContent=initials(user.name);
   document.getElementById('topName').textContent=user.name;
-  document.getElementById('topRole').textContent=user.role==='admin'?'Administrator':'Sales rep';
+  const roleLabels={admin:'Administrator',supervisor:'Supervisor',rep:'Sales Rep'};
+  document.getElementById('topRole').textContent=roleLabels[user.role]||user.role;
   document.getElementById('tbDate').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
-  if(user.role==='admin')document.getElementById('adminNav').style.display='block';
-  else document.getElementById('adminNav').style.display='none';
+
+  // show correct nav sections
+  const isAdmin=user.role==='admin';
+  document.getElementById('salesNav').style.display=isAdmin?'none':'block';
+  document.getElementById('adminNav').style.display=isAdmin?'block':'none';
+
   updateReorderBadge();updateDiscBadge();
-  switchTab('sell');
+
+  // admins land on users page; everyone else on sell
+  switchTab(isAdmin?'users':'sell');
+
+  logAudit('login','User signed in',`${user.name} (${user.role}) signed in`);
 }
 
 function doLogout(){
+  logAudit('logout','User signed out',`${currentUser.name} signed out`);
   currentUser=null;clearSession();
   document.getElementById('appScreen').style.display='none';
   document.getElementById('loginScreen').style.display='flex';
@@ -775,6 +861,7 @@ function switchTab(name){
   if(name==='summary'){buildRepFilter('sumRepFilter');renderSummary();}
   if(name==='monthly'){buildRepFilter('monthRepFilter');renderMonthly();}
   if(name==='discrepancy')renderDiscrepancy();
+  if(name==='auditlog')initAuditLog();
   if(name==='users')renderUsers();
   if(name==='allreports')renderAllReports();
 }
@@ -915,6 +1002,7 @@ function addSale(){
   const id='S'+(Date.now().toString().slice(-6));
   sales.push({id,date:today(),time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),product,cat,qty,buy,sell,customer,profit:(sell-buy)*qty,revenue:sell*qty,cost:buy*qty,uid:currentUser.id,uname:currentUser.name});
   saveSales(sales);
+  logAudit('sale','Sale recorded',`${product} x${qty} — Buy ${fmt(buy)} · Sell ${fmt(sell)} · Profit ${fmt((sell-buy)*qty)} · Customer: ${customer}`,{ref:id});
 
   // --- STOCK UPDATE LOGIC ---
   const stock=loadStock();
@@ -976,8 +1064,9 @@ function renderSalesTable(sales,container,canDelete){
 
 // ─── SUPERVISOR MODAL ──────────────────────────────────────
 let svCallback=null;
+function canAuthorise(role){return role==='admin'||role==='supervisor';}
 function requireSupervisor(title,sub,cb){
-  if(currentUser.role==='admin'){cb();return;} // admins skip the modal
+  if(canAuthorise(currentUser.role)){cb(currentUser);return;} // skip modal for admin/supervisor
   svCallback=cb;
   document.getElementById('svTitle').textContent=title||'Supervisor Authorisation Required';
   document.getElementById('svSub').textContent=sub||'This action requires a supervisor or admin to authorise.';
@@ -991,8 +1080,7 @@ function svCancel(){document.getElementById('svOverlay').style.display='none';sv
 function svConfirm(){
   const u=document.getElementById('svUser').value.trim().toLowerCase();
   const p=document.getElementById('svPass').value;
-  const users=loadUsers();
-  const supervisor=users.find(x=>x.username.toLowerCase()===u&&x.password===p&&x.role==='admin'&&x.active!==false);
+  const supervisor=loadUsers().find(x=>x.username.toLowerCase()===u&&x.password===p&&canAuthorise(x.role)&&x.active!==false);
   if(!supervisor){document.getElementById('svErr').style.display='block';return;}
   document.getElementById('svOverlay').style.display='none';
   document.getElementById('svErr').style.display='none';
@@ -1002,11 +1090,13 @@ function svConfirm(){
 document.getElementById('svPass').addEventListener('keydown',e=>{if(e.key==='Enter')svConfirm();});
 
 function deleteSale(id){
+  const sale=loadSales().find(s=>s.id===id);
   requireSupervisor(
-    'Delete Sale — Supervisor Required',
-    'Deleting a sale record is a restricted action. A supervisor or admin must enter their credentials to proceed.',
-    ()=>{
+    'Delete Sale — Authorisation Required',
+    'Deleting a sale record requires a supervisor or admin to authorise.',
+    (auth)=>{
       saveSales(loadSales().filter(s=>s.id!==id));
+      logAudit('sale_del','Sale deleted',`Sale ${id} — ${sale?.product||'?'} x${sale?.qty||'?'} — ${fmt(sale?.revenue||0)} revenue. Authorised by ${auth.name}`,{ref:id});
       renderDaily();renderTodayMetrics('todayMetrics');showSnack('Sale deleted','warn');
     }
   );
@@ -1037,7 +1127,7 @@ const CF_LABELS={
   zb_out:'ZB paid out'
 };
 const CF_HINTS={
-  expense:'Money paid out. This reduces your cash balance.',
+  expense:'Money paid out or handed to the manager mid-day. This reduces your cash balance.',
   income:'Money added from an external source (owner injection, etc). This increases your cash balance.',
   ecocash_in:'Customer paid via EcoCash and you gave cash as change. EcoCash in, cash out — reduces cash.',
   ecocash_out:'You paid out EcoCash to someone. Cash balance unaffected; tracked for records.',
@@ -1058,13 +1148,16 @@ function addCashFlow(){
   const cf=loadCashFlow();
   cf.push({id:'CF'+(Date.now().toString().slice(-6)),date:today(),time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),type,amount,note,uid:currentUser.id,uname:currentUser.name});
   saveCashFlow(cf);
+  logAudit('cashflow_add','Cash flow entry recorded',`${CF_LABELS[type]}: ${fmt(amount)}${note?' — '+note:''}`,{ref:cf[cf.length-1].id});
   document.getElementById('cfAmount').value='';document.getElementById('cfNote').value='';
   showSnack('Cash flow entry recorded');renderCashFlow();renderBalance();
 }
 
 function deleteCF(id){
+  const entry=loadCashFlow().find(c=>c.id===id);
   if(!confirm('Delete this cash flow entry?'))return;
   saveCashFlow(loadCashFlow().filter(c=>c.id!==id));
+  logAudit('cashflow_del','Cash flow entry deleted',`${CF_LABELS[entry?.type||'']} — ${fmt(entry?.amount||0)}${entry?.note?' — '+entry.note:''}`,{ref:id});
   renderCashFlow();renderBalance();showSnack('Entry deleted','warn');
 }
 
@@ -1156,6 +1249,8 @@ function saveBalance(){
   const balances=loadBalances();
   balances.push({id:'B'+(Date.now().toString().slice(-6)),date:today(),time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),uid:currentUser.id,uname:currentUser.name,expected,submitted:cashIn,diff,status,note,txCount:sales.length,cleared:false,clearedBy:null,clearedAt:null});
   saveBalances(balances);
+  const lastB=balances[balances.length-1];
+  logAudit('balance','Balance submitted',`Expected ${fmt(expected)}, submitted ${fmt(cashIn)}. Status: ${status}${Math.abs(diff)>0.01?' | Diff: '+fmt(diff):''}${note?' — '+note:''}`,{ref:lastB.id});
   updateDiscBadge();
   showSnack(status==='balanced'?'Balance submitted — perfect!':status==='over'?`Submitted — over by ${fmt(diff)}`:`Submitted — short by ${fmt(Math.abs(diff))}`,status==='balanced'?'success':'warn');
 }
@@ -1180,6 +1275,7 @@ function clearDiscrepancy(id){
   balances[idx].clearedAt=new Date().toLocaleString('en-GB');
   balances[idx].clearNote=note||'Cleared by admin';
   saveBalances(balances);
+  logAudit('disc_clear','Discrepancy cleared',`Balance ${id} by ${balances[idx].uname} — ${balances[idx].status} ${fmt(Math.abs(balances[idx].diff))} — Reason: ${note||'none'}`,{ref:id});
   updateDiscBadge();renderDiscrepancy();
   showSnack('Discrepancy cleared');
 }
@@ -1289,8 +1385,15 @@ function addStock(){
     ()=>{
       const stock=loadStock();
       const idx=stock.findIndex(s=>s.name.toLowerCase()===name.toLowerCase());
-      if(idx>=0){stock[idx]={...stock[idx],cat,qty,reorder,cost,sell};showSnack('Stock updated: '+name);}
-      else{stock.push({id:'I'+(Date.now().toString().slice(-5)),name,cat,qty,reorder,cost,sell,added:today()});showSnack('Added: '+name);}
+      if(idx>=0){
+        stock[idx]={...stock[idx],cat,qty,reorder,cost,sell};
+        logAudit('stock_edit','Stock item updated',`${name} — Qty: ${qty}, Cost: ${fmt(cost)}, Sell: ${fmt(sell)}, Reorder: ${reorder}. Authorised by ${arguments[0]?.name||'supervisor'}`);
+        showSnack('Stock updated: '+name);
+      } else {
+        stock.push({id:'I'+(Date.now().toString().slice(-5)),name,cat,qty,reorder,cost,sell,added:today()});
+        logAudit('stock_add','Stock item added',`${name} (${cat}) — Qty: ${qty}, Cost: ${fmt(cost)}, Sell: ${fmt(sell)}. Authorised by ${arguments[0]?.name||'supervisor'}`);
+        showSnack('Added: '+name);
+      }
       saveStock(stock);
       ['sName','sCost','sSell'].forEach(i=>document.getElementById(i).value='');
       document.getElementById('sQty').value=1;document.getElementById('sReorder').value=2;
@@ -1300,11 +1403,13 @@ function addStock(){
 }
 
 function deleteStock(id){
+  const item=loadStock().find(s=>s.id===id);
   requireSupervisor(
-    'Remove Stock Item — Supervisor Required',
+    'Remove Stock Item — Authorisation Required',
     'Removing a stock item requires supervisor authorisation.',
-    ()=>{
+    (auth)=>{
       saveStock(loadStock().filter(s=>s.id!==id));
+      logAudit('stock_del','Stock item removed',`${item?.name||id} removed from stock list. Authorised by ${auth.name}`);
       updateReorderBadge();renderStockMetrics();renderStockTable('');showSnack('Removed','warn');
     }
   );
@@ -1312,11 +1417,13 @@ function deleteStock(id){
 
 function adjustStock(id,delta){
   requireSupervisor(
-    'Adjust Stock — Supervisor Required',
+    'Adjust Stock — Authorisation Required',
     `Manually ${delta>0?'adding to':'removing from'} stock requires supervisor authorisation.`,
-    ()=>{
+    (auth)=>{
       const stock=loadStock();const idx=stock.findIndex(s=>s.id===id);if(idx<0)return;
+      const before=stock[idx].qty;
       stock[idx].qty=Math.max(0,stock[idx].qty+delta);saveStock(stock);
+      logAudit('stock_adj','Stock quantity adjusted',`${stock[idx].name}: ${before} → ${stock[idx].qty} (${delta>0?'+':''}${delta}). Authorised by ${auth.name}`);
       updateReorderBadge();renderStockTable('');renderStockMetrics();renderReorder();
       showSnack(delta>0?'+1 added':'-1 removed');
     }
@@ -1327,11 +1434,13 @@ function restock(id){
   const input=document.getElementById('ro_'+id);const qty=parseInt(input.value);
   if(!qty||qty<1){showSnack('Enter a quantity','error');return}
   requireSupervisor(
-    'Restock Item — Supervisor Required',
+    'Restock Item — Authorisation Required',
     'Adding stock quantities requires supervisor authorisation.',
-    ()=>{
+    (auth)=>{
       const stock=loadStock();const idx=stock.findIndex(s=>s.id===id);if(idx<0)return;
+      const before=stock[idx].qty;
       stock[idx].qty+=qty;saveStock(stock);
+      logAudit('restock','Stock restocked',`${stock[idx].name}: +${qty} units (${before} → ${stock[idx].qty}). Authorised by ${auth.name}`);
       showSnack(`${stock[idx].name} +${qty} (now ${stock[idx].qty})`);
       updateReorderBadge();renderReorder();renderStockTable('');renderStockMetrics();
     }
@@ -1426,14 +1535,21 @@ function renderAllReports(){
 // ─── USERS ─────────────────────────────────────────────────
 function renderUsers(){
   const users=loadUsers();
+  const roleColor={admin:'b-purple',supervisor:'b-amber',rep:'b-green'};
+  const roleLabel={admin:'Admin',supervisor:'Supervisor',rep:'Sales Rep'};
+  const avatarStyle={
+    admin:'background:rgba(160,100,255,.15);color:#a064ff',
+    supervisor:'background:rgba(210,153,34,.15);color:var(--amber)',
+    rep:'background:rgba(63,185,80,.12);color:var(--green)'
+  };
   document.getElementById('usersList').innerHTML=users.map(u=>`
     <div class="user-card">
       <div class="ua-left">
-        <div class="ua-avatar" style="background:${u.role==='admin'?'rgba(160,100,255,.15)':'rgba(0,200,150,.12)'};color:${u.role==='admin'?'#a064ff':'var(--green)'};">${initials(u.name)}</div>
-        <div><div class="ua-name">${u.name}</div><div class="ua-meta">@${u.username} · ${u.role==='admin'?'Administrator':'Sales rep'} ${u.active===false?'· <span style="color:var(--red)">Disabled</span>':''}</div></div>
+        <div class="ua-avatar" style="${avatarStyle[u.role]||avatarStyle.rep}">${initials(u.name)}</div>
+        <div><div class="ua-name">${u.name}</div><div class="ua-meta">@${u.username} · ${roleLabel[u.role]||u.role} ${u.active===false?'· <span style="color:var(--red)">Disabled</span>':''}</div></div>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
-        <span class="badge ${u.role==='admin'?'b-purple':'b-green'}">${u.role}</span>
+        <span class="badge ${roleColor[u.role]||'b-gray'}">${roleLabel[u.role]||u.role}</span>
         ${u.id!=='u1'?`<button class="btn-sm ${u.active===false?'success':'danger'}" onclick="toggleUser('${u.id}')">${u.active===false?'Enable':'Disable'}</button>`:''}
         ${u.id!=='u1'&&u.id!==currentUser.id?`<button class="btn-sm danger" onclick="deleteUser('${u.id}')"><i class="ti ti-trash"></i></button>`:''}
       </div>
@@ -1450,19 +1566,25 @@ function addUser(){
   if(users.find(u=>u.username===username)){showSnack('Username already exists','error');return}
   users.push({id:'u'+(Date.now().toString().slice(-5)),name,username,password,role,active:true});
   lsSave('ts_users',users);
+  logAudit('user_add','User account created',`${name} (@${username}) — role: ${role}`);
   ['uName','uUser','uPass'].forEach(i=>document.getElementById(i).value='');
   showSnack('User created: '+name);renderUsers();
 }
 
 function toggleUser(id){
   const users=loadUsers();const idx=users.findIndex(u=>u.id===id);if(idx<0)return;
-  users[idx].active=!users[idx].active;lsSave('ts_users',users);renderUsers();
+  users[idx].active=!users[idx].active;lsSave('ts_users',users);
+  logAudit('user_tog','User account toggled',`${users[idx].name} (@${users[idx].username}) — now ${users[idx].active?'enabled':'disabled'}`);
+  renderUsers();
   showSnack(users[idx].active?'User enabled':'User disabled','warn');
 }
 
 function deleteUser(id){
+  const user=loadUsers().find(u=>u.id===id);
   if(!confirm('Delete this user?'))return;
-  lsSave('ts_users',loadUsers().filter(u=>u.id!==id));renderUsers();showSnack('User deleted','warn');
+  lsSave('ts_users',loadUsers().filter(u=>u.id!==id));
+  logAudit('user_del','User account deleted',`${user?.name||id} (@${user?.username||'?'}) — role: ${user?.role||'?'}`);
+  renderUsers();showSnack('User deleted','warn');
 }
 
 function printDaily(){
@@ -1691,6 +1813,123 @@ function printSummary(){
   const balRows=bals.map(b=>`${b.date} ${b.time}\t${b.uname}\tExpected:${fmt(b.expected)}\tSubmitted:${fmt(b.submitted)}\t${b.status}`).join('\n');
   const rpt=`SUMMARY REPORT — ${periodLabel(from,to)}\n${'='.repeat(70)}\nRevenue: ${fmt(rev)}   Cost: ${fmt(cost)}   Profit: ${fmt(profit)}\nSales: ${sales.length}\n\nTRANSACTIONS\nDate/Time\tRef\tProduct\tQty\tBuy\tSell\tProfit\tRep\n${rows}\n\nBALANCE SUBMISSIONS\nDate/Time\tRep\tExpected\tSubmitted\tStatus\n${balRows}\n${'='.repeat(70)}`;
   const w=window.open('','_blank');if(w){w.document.write('<pre style="font:13px monospace;padding:24px;background:#fff;color:#000">'+rpt+'</pre>');w.print();}
+}
+
+// ─── AUDIT LOG SYSTEM ──────────────────────────────────────
+function loadAudit(){return lsArr('ts_audit')}
+function saveAudit(d){
+  // keep most recent 2000 entries to avoid filling localStorage
+  if(d.length>2000)d=d.slice(d.length-2000);
+  lsSave('ts_audit',d);
+}
+
+const AL_CAT={
+  sale:'sale',sale_del:'sale',
+  stock_add:'stock',stock_edit:'stock',stock_del:'stock',stock_adj:'stock',restock:'stock',
+  balance:'balance',disc_clear:'balance',
+  cashflow_add:'cashflow',cashflow_del:'cashflow',
+  login:'system',logout:'system',
+  user_add:'user',user_del:'user',user_tog:'user'
+};
+
+const AL_ICONS={
+  sale:'🟢',sale_del:'🔴',
+  stock_add:'🔵',stock_edit:'🟡',stock_del:'🔴',stock_adj:'🟡',restock:'🟢',
+  balance:'🟣',disc_clear:'🟢',
+  cashflow_add:'🔵',cashflow_del:'🔴',
+  login:'⚫',logout:'⚫',
+  user_add:'🟢',user_del:'🔴',user_tog:'🟡'
+};
+
+const AL_DOT={
+  sale:'sale',sale_del:'sale-del',
+  stock_add:'stock-add',stock_edit:'stock-edit',stock_del:'stock-del',stock_adj:'stock-adj',restock:'restock',
+  balance:'balance',disc_clear:'disc-clear',
+  cashflow_add:'cashflow',cashflow_del:'cashflow-del',
+  login:'login',logout:'login',
+  user_add:'user-add',user_del:'user-del',user_tog:'user-tog'
+};
+
+function logAudit(type,action,detail,extra={}){
+  const audit=loadAudit();
+  audit.push({
+    id:'AL'+(Date.now().toString().slice(-7)),
+    ts:Date.now(),
+    date:today(),
+    time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),
+    type,
+    cat:AL_CAT[type]||'system',
+    action,
+    detail,
+    uid:currentUser?currentUser.id:'',
+    uname:currentUser?currentUser.name:'System',
+    ...extra
+  });
+  saveAudit(audit);
+}
+
+let alActiveCat='';
+
+function alSetCat(btn,cat){
+  document.querySelectorAll('.al-filter-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  alActiveCat=cat;
+  renderAuditLog();
+}
+
+function initAuditLog(){
+  // set default date range to today
+  const td=today();
+  const from=document.getElementById('alFromDate');
+  const to=document.getElementById('alToDate');
+  if(!from.value)from.value=td;
+  if(!to.value)to.value=td;
+  buildRepFilter('alRepFilter');
+  renderAuditLog();
+}
+
+function renderAuditLog(){
+  const from=document.getElementById('alFromDate').value||today();
+  const to=document.getElementById('alToDate').value||today();
+  const uid=(document.getElementById('alRepFilter')||{}).value||'';
+
+  let entries=loadAudit().filter(e=>inRange(e.date,from,to));
+  if(uid)entries=entries.filter(e=>e.uid===uid);
+  if(alActiveCat)entries=entries.filter(e=>e.cat===alActiveCat);
+  entries=[...entries].reverse(); // newest first
+
+  // metrics
+  const total=loadAudit().length;
+  const todayCount=loadAudit().filter(e=>e.date===today()).length;
+  const saleLogs=loadAudit().filter(e=>e.type==='sale_del').length;
+  const stockLogs=loadAudit().filter(e=>e.cat==='stock').length;
+  document.getElementById('alMetrics').innerHTML=`
+    <div class="metric"><div class="metric-label">Total log entries</div><div class="metric-val">${total}</div></div>
+    <div class="metric"><div class="metric-label">Today's actions</div><div class="metric-val">${todayCount}</div></div>
+    <div class="metric"><div class="metric-label">Sales deleted (ever)</div><div class="metric-val red">${saleLogs}</div></div>
+    <div class="metric"><div class="metric-label">Stock changes (ever)</div><div class="metric-val blue">${stockLogs}</div></div>`;
+
+  const el=document.getElementById('alList');
+  if(!entries.length){
+    el.innerHTML='<div class="empty">No activity recorded for this period and filter</div>';return;
+  }
+
+  el.innerHTML=entries.map(e=>{
+    const dotClass=AL_DOT[e.type]||'login';
+    return `<div class="al-item">
+      <div class="al-dot ${dotClass}"></div>
+      <div class="al-body">
+        <div class="al-action">${e.action}</div>
+        <div class="al-detail">${e.detail}</div>
+        <div class="al-meta">
+          <span>${e.date} ${e.time}</span>
+          <span>${e.uname}</span>
+          <span>${e.cat}</span>
+          ${e.ref?`<span>${e.ref}</span>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ─── BOOT ──────────────────────────────────────────────────

@@ -424,7 +424,7 @@ tr:hover td{background:var(--surface2)}
               </select>
             </div>
             <div class="field"><label>Amount $</label><input id="cfAmount" type="number" placeholder="0.00" step="0.01" min="0"></div>
-            <div class="field"><label>Reference / Notes</label><input id="cfNote" type="text" placeholder="e.g. Midday handover to manager"></div>
+            <div class="field"><label>Reference / Notes</label><input id="cfNote" type="text" placeholder="e.g. Bought shutter glass & pouch"></div>
           </div>
           <div id="cfTypeHint" style="font-size:12px;color:var(--text3);margin-bottom:12px;padding:8px 12px;background:var(--surface2);border-radius:var(--radius)"></div>
           <button class="btn-primary" onclick="addCashFlow()" style="width:auto;padding:10px 24px"><i class="ti ti-plus"></i> Record entry</button>
@@ -442,7 +442,7 @@ tr:hover td{background:var(--surface2)}
           <div class="bal-row"><span style="color:var(--text2)">Sales revenue (my sales today)</span><span id="balSales" style="font-weight:600">$0.00</span></div>
           <div class="bal-row"><span style="color:var(--text2)">Cost of goods</span><span id="balCost" style="color:var(--red);font-weight:600">−$0.00</span></div>
           <div class="bal-row"><span style="color:var(--text2)">Income injections today</span><span id="balIncome" style="color:var(--green);font-weight:600">+$0.00</span></div>
-          <div class="bal-row"><span style="color:var(--text2)">Expenses / Manager payouts</span><span id="balExpense" style="color:var(--red);font-weight:600">−$0.00</span></div>
+          <div class="bal-row"><span style="color:var(--text2)">Expenses / Money extracted</span><span id="balExpense" style="color:var(--red);font-weight:600">−$0.00</span></div>
           <div class="bal-row"><span style="color:var(--text2)">EcoCash net (in − out)</span><span id="balEco" style="font-weight:600">$0.00</span></div>
           <div class="bal-row"><span style="color:var(--text2)">ZB net (in − out)</span><span id="balZB" style="font-weight:600">$0.00</span></div>
           <div class="bal-row"><span style="font-weight:500">Expected cash in hand</span><span id="balOwner" class="bal-total">$0.00</span></div>
@@ -1037,7 +1037,7 @@ const CF_LABELS={
   zb_out:'ZB paid out'
 };
 const CF_HINTS={
-  expense:'Money paid out or handed to the manager mid-day. This reduces your cash balance.',
+  expense:'Money paid out. This reduces your cash balance.',
   income:'Money added from an external source (owner injection, etc). This increases your cash balance.',
   ecocash_in:'Customer paid via EcoCash and you gave cash as change. EcoCash in, cash out — reduces cash.',
   ecocash_out:'You paid out EcoCash to someone. Cash balance unaffected; tracked for records.',

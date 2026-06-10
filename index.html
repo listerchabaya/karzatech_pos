@@ -310,12 +310,12 @@ tr:hover td{background:var(--surface2)}
     <div class="lfield"><label>Password</label><input id="lPass" type="password" placeholder="Enter password"></div>
     <div class="login-err" id="loginErr">Invalid username or password</div>
     <button class="btn-login" onclick="doLogin()">Sign in</button>
-    <!-- <div class="demo-hint">
+    <div class="demo-hint">
       <strong>Demo accounts:</strong><br>
       admin / admin123 (admin — system config only)<br>
       supervisor / super123 (supervisor — can authorise)<br>
       sarah / pass123 · james / pass123 (sales reps)
-    </div> -->
+    </div>
   </div>
 </div>
 
@@ -347,24 +347,24 @@ tr:hover td{background:var(--surface2)}
       <div id="salesNav">
         <div class="nav-label">Sales</div>
         <div class="nav-item active" onclick="switchTab('sell')" id="nav-sell"><i class="ti ti-receipt"></i> New sale</div>
-        <div class="nav-item" onclick="switchTab('daily')" id="nav-daily"><i class="ti ti-calendar-stats"></i> Today</div>
         <div class="nav-item" onclick="switchTab('cashflow')" id="nav-cashflow"><i class="ti ti-arrows-exchange"></i> Cash Flow</div>
         <div class="nav-item" onclick="switchTab('balance')" id="nav-balance"><i class="ti ti-coin"></i> Balance</div>
         <div class="nav-label">Inventory</div>
         <div class="nav-item" onclick="switchTab('stock')" id="nav-stock"><i class="ti ti-box"></i> Stock</div>
         <div class="nav-item" onclick="switchTab('reorder')" id="nav-reorder"><i class="ti ti-bell"></i> Reorder <span class="nav-badge" id="reorderBadge" style="display:none"></span></div>
         <div class="nav-label">Reports</div>
-        <div class="nav-item" onclick="switchTab('summary')" id="nav-summary"><i class="ti ti-file-report"></i> Day Summary</div>
+        <div class="nav-item" onclick="switchTab('summary')" id="nav-summary"><i class="ti ti-calendar-stats"></i> Today & Reports</div>
         <div class="nav-item" onclick="switchTab('monthly')" id="nav-monthly"><i class="ti ti-chart-bar"></i> Monthly</div>
         <div class="nav-item" onclick="switchTab('discrepancy')" id="nav-discrepancy"><i class="ti ti-alert-triangle"></i> Discrepancies <span class="nav-badge" id="discBadge" style="display:none"></span></div>
-        <div class="nav-item" onclick="switchTab('auditlog')" id="nav-auditlog"><i class="ti ti-history"></i> Activity Log</div>
       </div>
       <!-- Admin nav: shown to admin only -->
       <div id="adminNav" style="display:none">
+        <div class="nav-label">Today</div>
+        <div class="nav-item active" onclick="switchTab('admindash')" id="nav-admindash"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
         <div class="nav-label">Administration</div>
         <div class="nav-item" onclick="switchTab('users')" id="nav-users"><i class="ti ti-users"></i> Users</div>
         <div class="nav-item" onclick="switchTab('allreports')" id="nav-allreports"><i class="ti ti-report-analytics"></i> All Reports</div>
-        <div class="nav-item" onclick="switchTab('auditlog')" id="nav-auditlog-admin"><i class="ti ti-history"></i> Activity Log</div>
+        <div class="nav-item" onclick="switchTab('auditlog')" id="nav-auditlog"><i class="ti ti-history"></i> Activity Log</div>
       </div>
     </div>
     <div class="main">
@@ -430,18 +430,55 @@ tr:hover td{background:var(--surface2)}
         </div>
       </div>
 
-      <!-- TODAY -->
-      <div class="panel" id="panel-daily">
-        <div class="metrics" id="dailyMetrics"></div>
-        <div class="card">
-          <div class="card-head">
-            <div class="card-title">Today's transactions</div>
-            <div style="display:flex;gap:8px">
-              <select id="repFilter" style="font-size:12px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text)" onchange="renderDaily()"></select>
-              <button class="btn-sm" onclick="printDaily()"><i class="ti ti-printer"></i> Print</button>
+      <!-- TODAY & REPORTS (merged daily + summary) -->
+      <div class="panel" id="panel-summary">
+        <!-- filter bar -->
+        <div class="card" style="margin-bottom:1rem">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <div style="font-size:13px;font-weight:600;color:var(--text2);white-space:nowrap">Period:</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="btn-sm active-quick" id="sqToday" onclick="setSumQuick('today')">Today</button>
+              <button class="btn-sm" id="sqYest" onclick="setSumQuick('yesterday')">Yesterday</button>
+              <button class="btn-sm" id="sqWeek" onclick="setSumQuick('week')">Last 7 days</button>
+              <button class="btn-sm" id="sqMonth" onclick="setSumQuick('month')">This month</button>
+              <button class="btn-sm" id="sqCustom" onclick="setSumQuick('custom')">Custom</button>
+            </div>
+            <div id="sumCustomRange" style="display:none;gap:8px;align-items:center;flex-wrap:wrap">
+              <input type="date" id="sumFrom" onchange="renderSummary()" style="font-size:12px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text)">
+              <span style="font-size:12px;color:var(--text3)">to</span>
+              <input type="date" id="sumTo" onchange="renderSummary()" style="font-size:12px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text)">
+            </div>
+            <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+              <select id="sumRepFilter" style="font-size:12px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text)" onchange="renderSummary()"></select>
+              <button class="btn-sm" onclick="printSummary()"><i class="ti ti-printer"></i> Print</button>
             </div>
           </div>
-          <div class="tbl-wrap" id="dailyTable"></div>
+        </div>
+        <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:1rem" id="sumPeriodLabel"></div>
+        <div class="metrics" id="sumMetrics"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem" id="sumDetailGrid">
+          <div class="card" id="sumSalesCard">
+            <div class="card-head"><div class="card-title">Sales by category</div><span id="sumSalesCount" style="font-size:11px;color:var(--text3)"></span></div>
+            <div id="sumSalesList"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:1rem">
+            <div class="card">
+              <div class="card-head"><div class="card-title">Cash reconciliation</div></div>
+              <div id="sumBalList"></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><div class="card-title">Cash flow entries</div></div>
+              <div id="sumCFList"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="sumDiscCard" style="display:none">
+          <div class="card-head"><div class="card-title">Discrepancies in period</div></div>
+          <div id="sumDiscList"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">All transactions</div></div>
+          <div class="tbl-wrap" id="sumTxTable"></div>
         </div>
       </div>
 
@@ -454,7 +491,7 @@ tr:hover td{background:var(--surface2)}
             <div class="field">
               <label>Type</label>
               <select id="cfType" onchange="updateCFTypeHint()">
-                <option value="expense">Expense / Money extracted</option>
+                <option value="expense">Expense / Money sent to manager</option>
                 <option value="income">Income / Money injected</option>
                 <option value="ecocash_in">EcoCash received (as change)</option>
                 <option value="ecocash_out">EcoCash paid out</option>
@@ -481,7 +518,7 @@ tr:hover td{background:var(--surface2)}
           <div class="bal-row"><span style="color:var(--text2)">Sales revenue (my sales today)</span><span id="balSales" style="font-weight:600">$0.00</span></div>
           <div class="bal-row"><span style="color:var(--text2)">Cost of goods</span><span id="balCost" style="color:var(--red);font-weight:600">−$0.00</span></div>
           <div class="bal-row"><span style="color:var(--text2)">Income injections today</span><span id="balIncome" style="color:var(--green);font-weight:600">+$0.00</span></div>
-          <div class="bal-row"><span style="color:var(--text2)">Expenses / Money extracted</span><span id="balExpense" style="color:var(--red);font-weight:600">−$0.00</span></div>
+          <div class="bal-row"><span style="color:var(--text2)">Expenses / Manager payouts</span><span id="balExpense" style="color:var(--red);font-weight:600">−$0.00</span></div>
           <div class="bal-row"><span style="color:var(--text2)">EcoCash net (in − out)</span><span id="balEco" style="font-weight:600">$0.00</span></div>
           <div class="bal-row"><span style="color:var(--text2)">ZB net (in − out)</span><span id="balZB" style="font-weight:600">$0.00</span></div>
           <div class="bal-row"><span style="font-weight:500">Expected cash in hand</span><span id="balOwner" class="bal-total">$0.00</span></div>
@@ -553,70 +590,30 @@ tr:hover td{background:var(--surface2)}
         </div>
       </div>
 
-      <!-- DAY SUMMARY -->
-      <div class="panel" id="panel-summary">
-        <!-- filter bar -->
-        <div class="card" style="margin-bottom:1rem">
-          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-            <div style="font-size:13px;font-weight:600;color:var(--text2);white-space:nowrap">View summary for:</div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap" id="sumQuickBtns">
-              <button class="btn-sm active-quick" id="sqToday" onclick="setSumQuick('today')">Today</button>
-              <button class="btn-sm" id="sqYest" onclick="setSumQuick('yesterday')">Yesterday</button>
-              <button class="btn-sm" id="sqWeek" onclick="setSumQuick('week')">Last 7 days</button>
-              <button class="btn-sm" id="sqMonth" onclick="setSumQuick('month')">This month</button>
-              <button class="btn-sm" id="sqCustom" onclick="setSumQuick('custom')">Custom range</button>
-            </div>
-            <div id="sumCustomRange" style="display:none;gap:8px;align-items:center;flex-wrap:wrap">
-              <input type="date" id="sumFrom" onchange="renderSummary()" style="font-size:12px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text)">
-              <span style="color:var(--text3);font-size:12px">to</span>
-              <input type="date" id="sumTo" onchange="renderSummary()" style="font-size:12px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text)">
-            </div>
-            <div style="margin-left:auto;display:flex;gap:6px">
-              <select id="sumRepFilter" style="font-size:12px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text)" onchange="renderSummary()"></select>
-              <button class="btn-sm" onclick="printSummary()"><i class="ti ti-printer"></i> Print</button>
-            </div>
+      <!-- ADMIN DASHBOARD -->
+      <div class="panel" id="panel-admindash">
+        <div style="font-size:18px;font-weight:600;margin-bottom:1rem" id="dashDateLabel"></div>
+        <div class="metrics" id="dashMetrics"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+          <div class="card">
+            <div class="card-head"><div class="card-title">Revenue by rep — today</div></div>
+            <div id="dashRepTable"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="card-title">Cash balances submitted today</div></div>
+            <div id="dashBalTable"></div>
           </div>
         </div>
-
-        <!-- period label -->
-        <div style="font-size:18px;font-weight:600;color:var(--text);margin-bottom:1rem" id="sumPeriodLabel"></div>
-
-        <!-- top metrics -->
-        <div class="metrics" id="sumMetrics"></div>
-
-        <!-- two-column detail -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem" id="sumDetailGrid">
-
-          <div class="card" id="sumSalesCard">
-            <div class="card-head"><div class="card-title">Sales breakdown</div><span id="sumSalesCount" style="font-size:11px;color:var(--text3)"></span></div>
-            <div id="sumSalesList"></div>
-          </div>
-
-          <div style="display:flex;flex-direction:column;gap:1rem">
-            <div class="card">
-              <div class="card-head"><div class="card-title">Cash reconciliation</div></div>
-              <div id="sumBalList"></div>
-            </div>
-            <div class="card">
-              <div class="card-head"><div class="card-title">Cash flow entries</div></div>
-              <div id="sumCFList"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- discrepancies for period -->
-        <div class="card" id="sumDiscCard">
-          <div class="card-head"><div class="card-title">Discrepancies in period</div></div>
-          <div id="sumDiscList"></div>
-        </div>
-
-        <!-- full transaction table -->
         <div class="card">
-          <div class="card-head"><div class="card-title">All transactions in period</div></div>
-          <div class="tbl-wrap" id="sumTxTable"></div>
+          <div class="card-head">
+            <div class="card-title">All transactions today</div>
+            <button class="btn-sm" onclick="printAdminDaily()"><i class="ti ti-printer"></i> Print</button>
+          </div>
+          <div class="tbl-wrap" id="dashTxTable"></div>
         </div>
       </div>
 
+      <!-- ACTIVITY LOG (admin only) -->
       <!-- ACTIVITY LOG -->
       <div class="panel" id="panel-auditlog">
         <div class="metrics" id="alMetrics"></div>
@@ -694,6 +691,17 @@ tr:hover td{background:var(--surface2)}
     </div>
   </div>
 </div>
+<!-- RECEIPT MODAL -->
+<div class="sv-overlay" id="receiptOverlay" style="display:none">
+  <div class="sv-box" style="max-width:380px">
+    <div id="receiptContent" style="font-family:'DM Mono',monospace;font-size:13px;line-height:1.7;white-space:pre-wrap;background:var(--surface2);border-radius:var(--radius);padding:1.2rem;margin-bottom:1rem;color:var(--text)"></div>
+    <div style="display:flex;gap:10px">
+      <button class="sv-btn-cancel" onclick="closeReceipt()" style="flex:1">Close</button>
+      <button class="sv-btn-confirm" onclick="doPrintReceipt()" style="flex:1"><i class="ti ti-printer"></i> Print Receipt</button>
+    </div>
+  </div>
+</div>
+
 <!-- SUPERVISOR PASSWORD MODAL -->
 <div class="sv-overlay" id="svOverlay" style="display:none">
   <div class="sv-box">
@@ -816,8 +824,8 @@ function bootApp(user){
 
   updateReorderBadge();updateDiscBadge();
 
-  // admins land on users page; everyone else on sell
-  switchTab(isAdmin?'users':'sell');
+  // admins land on their dashboard; everyone else on sell
+  switchTab(isAdmin?'admindash':'sell');
 
   logAudit('login','User signed in',`${user.name} (${user.role}) signed in`);
 }
@@ -851,9 +859,8 @@ function switchTab(name){
   const nav=document.getElementById('nav-'+name);if(nav)nav.classList.add('active');
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+name).classList.add('active');
-  closeSidebar(); // auto-close on mobile after picking a tab
+  closeSidebar();
   if(name==='sell')renderTodayMetrics('todayMetrics');
-  if(name==='daily'){buildRepFilter('repFilter');renderDaily();}
   if(name==='cashflow')renderCashFlow();
   if(name==='balance')renderBalance();
   if(name==='stock'){renderStockMetrics();renderStockTable('');}
@@ -861,6 +868,7 @@ function switchTab(name){
   if(name==='summary'){buildRepFilter('sumRepFilter');renderSummary();}
   if(name==='monthly'){buildRepFilter('monthRepFilter');renderMonthly();}
   if(name==='discrepancy')renderDiscrepancy();
+  if(name==='admindash')renderAdminDash();
   if(name==='auditlog')initAuditLog();
   if(name==='users')renderUsers();
   if(name==='allreports')renderAllReports();
@@ -1000,7 +1008,8 @@ function addSale(){
   // record the sale
   const sales=loadSales();
   const id='S'+(Date.now().toString().slice(-6));
-  sales.push({id,date:today(),time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),product,cat,qty,buy,sell,customer,profit:(sell-buy)*qty,revenue:sell*qty,cost:buy*qty,uid:currentUser.id,uname:currentUser.name});
+  const saleRecord={id,date:today(),time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),product,cat,qty,buy,sell,customer,profit:(sell-buy)*qty,revenue:sell*qty,cost:buy*qty,uid:currentUser.id,uname:currentUser.name};
+  sales.push(saleRecord);
   saveSales(sales);
   logAudit('sale','Sale recorded',`${product} x${qty} — Buy ${fmt(buy)} · Sell ${fmt(sell)} · Profit ${fmt((sell-buy)*qty)} · Customer: ${customer}`,{ref:id});
 
@@ -1050,6 +1059,8 @@ function addSale(){
   document.getElementById('qasPanel').style.display='none';
   selectedStockItem=null;
   showSnack(msg);updateReorderBadge();renderTodayMetrics('todayMetrics');
+  // Show receipt
+  showReceipt(saleRecord);
 }
 
 function renderSalesTable(sales,container,canDelete){
@@ -1097,29 +1108,14 @@ function deleteSale(id){
     (auth)=>{
       saveSales(loadSales().filter(s=>s.id!==id));
       logAudit('sale_del','Sale deleted',`Sale ${id} — ${sale?.product||'?'} x${sale?.qty||'?'} — ${fmt(sale?.revenue||0)} revenue. Authorised by ${auth.name}`,{ref:id});
-      renderDaily();renderTodayMetrics('todayMetrics');showSnack('Sale deleted','warn');
+      renderTodayMetrics('todayMetrics');renderSummary();showSnack('Sale deleted','warn');
     }
   );
 }
 
-function renderDaily(){
-  const filter=document.getElementById('repFilter');
-  const uid=filter?filter.value:'';
-  let sales=loadSales().filter(s=>s.date===today());
-  if(uid)sales=sales.filter(s=>s.uid===uid);
-  const rev=sales.reduce((a,s)=>a+s.revenue,0);
-  const cost=sales.reduce((a,s)=>a+s.cost,0);
-  document.getElementById('dailyMetrics').innerHTML=`
-    <div class="metric"><div class="metric-label">Transactions</div><div class="metric-val">${sales.length}</div></div>
-    <div class="metric"><div class="metric-label">Revenue</div><div class="metric-val">${fmtN(rev)}</div></div>
-    <div class="metric"><div class="metric-label">Cost</div><div class="metric-val">${fmtN(cost)}</div></div>
-    <div class="metric"><div class="metric-label">Net profit</div><div class="metric-val green">${fmtN(rev-cost)}</div></div>`;
-  renderSalesTable(sales,document.getElementById('dailyTable'),true);
-}
-
 // ─── CASH FLOW (FIX #4) ────────────────────────────────────
 const CF_LABELS={
-  expense:'Expense / Money extracted',
+  expense:'Expense / Manager payout',
   income:'Income injection',
   ecocash_in:'EcoCash received',
   ecocash_out:'EcoCash paid out',
@@ -1127,7 +1123,7 @@ const CF_LABELS={
   zb_out:'ZB paid out'
 };
 const CF_HINTS={
-  expense:'Money paid out. This reduces your cash balance.',
+  expense:'Money paid out or handed to the manager mid-day. This reduces your cash balance.',
   income:'Money added from an external source (owner injection, etc). This increases your cash balance.',
   ecocash_in:'Customer paid via EcoCash and you gave cash as change. EcoCash in, cash out — reduces cash.',
   ecocash_out:'You paid out EcoCash to someone. Cash balance unaffected; tracked for records.',
@@ -1930,6 +1926,137 @@ function renderAuditLog(){
       </div>
     </div>`;
   }).join('');
+}
+
+// ─── RECEIPT ───────────────────────────────────────────────
+let lastSaleForReceipt=null;
+
+function showReceipt(sale){
+  lastSaleForReceipt=sale;
+  const lines=[
+    `       KARZA TECHNOLOGIES`,
+    `    ICT Gadgets & Accessories`,
+    `${'─'.repeat(34)}`,
+    `Receipt No: ${sale.id}`,
+    `Date:       ${sale.date}  ${sale.time}`,
+    `Served by:  ${sale.uname}`,
+    `${'─'.repeat(34)}`,
+    `Item:  ${sale.product}`,
+    `Category: ${sale.cat}`,
+    `Qty:   ${sale.qty}`,
+    `Price: ${fmt(sale.sell)} per unit`,
+    `${'─'.repeat(34)}`,
+    `TOTAL:     ${fmt(sale.revenue)}`,
+    `${'─'.repeat(34)}`,
+    `Customer:  ${sale.customer||'Walk-in'}`,
+    ``,
+    `  Thank you for your purchase!`,
+    `    Come back soon. 😊`,
+    `${'─'.repeat(34)}`,
+  ].join('\n');
+  document.getElementById('receiptContent').textContent=lines;
+  document.getElementById('receiptOverlay').style.display='flex';
+}
+
+function closeReceipt(){
+  document.getElementById('receiptOverlay').style.display='none';
+  lastSaleForReceipt=null;
+}
+
+function doPrintReceipt(){
+  if(!lastSaleForReceipt)return;
+  const s=lastSaleForReceipt;
+  const html=`<html><head><style>
+    body{font-family:monospace;font-size:13px;padding:20px;max-width:320px;margin:0 auto}
+    h2{text-align:center;margin:0;font-size:14px}
+    .sub{text-align:center;color:#555;margin-bottom:10px;font-size:12px}
+    hr{border:none;border-top:1px dashed #999;margin:8px 0}
+    .row{display:flex;justify-content:space-between}
+    .total{font-weight:bold;font-size:15px}
+    .footer{text-align:center;color:#555;margin-top:10px;font-size:12px}
+  </style></head><body>
+    <h2>KARZA TECHNOLOGIES</h2>
+    <div class="sub">ICT Gadgets &amp; Accessories</div>
+    <hr>
+    <div class="row"><span>Receipt No:</span><span>${s.id}</span></div>
+    <div class="row"><span>Date:</span><span>${s.date} ${s.time}</span></div>
+    <div class="row"><span>Served by:</span><span>${s.uname}</span></div>
+    <div class="row"><span>Customer:</span><span>${s.customer||'Walk-in'}</span></div>
+    <hr>
+    <div class="row"><span>Item:</span><span>${s.product}</span></div>
+    <div class="row"><span>Category:</span><span>${s.cat}</span></div>
+    <div class="row"><span>Qty:</span><span>${s.qty}</span></div>
+    <div class="row"><span>Unit price:</span><span>${fmt(s.sell)}</span></div>
+    <hr>
+    <div class="row total"><span>TOTAL:</span><span>${fmt(s.revenue)}</span></div>
+    <hr>
+    <div class="footer">Thank you for your purchase!<br>Come back soon.</div>
+  </body></html>`;
+  const w=window.open('','_blank','width=380,height=600');
+  if(w){w.document.write(html);w.document.close();w.focus();w.print();w.close();}
+}
+
+// ─── ADMIN DASHBOARD ───────────────────────────────────────
+function renderAdminDash(){
+  const allSales=loadSales().filter(s=>s.date===today());
+  const users=loadUsers();
+  const balances=loadBalances().filter(b=>b.date===today());
+  const rev=allSales.reduce((a,s)=>a+s.revenue,0);
+  const cost=allSales.reduce((a,s)=>a+s.cost,0);
+  const profit=rev-cost;
+  const discCount=balances.filter(b=>b.status!=='balanced').length;
+
+  document.getElementById('dashDateLabel').textContent=
+    'Dashboard — '+new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  document.getElementById('dashMetrics').innerHTML=`
+    <div class="metric"><div class="metric-label">Total sales today</div><div class="metric-val">${allSales.length}</div></div>
+    <div class="metric"><div class="metric-label">Revenue today</div><div class="metric-val blue">${fmtN(rev)}</div></div>
+    <div class="metric"><div class="metric-label">Cost today</div><div class="metric-val">${fmtN(cost)}</div></div>
+    <div class="metric"><div class="metric-label">Profit today</div><div class="metric-val green">${fmtN(profit)}</div></div>
+    <div class="metric"><div class="metric-label">Balance submissions</div><div class="metric-val">${balances.length}</div></div>
+    <div class="metric"><div class="metric-label">Discrepancies today</div><div class="metric-val ${discCount>0?'red':''}">${discCount}</div></div>`;
+
+  // per-rep table
+  let repH='<table><thead><tr><th>Rep</th><th>Sales</th><th>Revenue</th><th>Profit</th></tr></thead><tbody>';
+  users.filter(u=>u.role!=='admin').forEach(u=>{
+    const us=allSales.filter(s=>s.uid===u.id);
+    if(!us.length)return;
+    const r=us.reduce((a,s)=>a+s.revenue,0);
+    const p=us.reduce((a,s)=>a+s.profit,0);
+    repH+=`<tr><td style="font-weight:500">${u.name}</td><td>${us.length}</td><td>${fmtN(r)}</td><td><span class="badge ${p>=0?'b-green':'b-red'}">${p>=0?'+':''}${fmtN(p)}</span></td></tr>`;
+  });
+  repH+='</tbody></table>';
+  document.getElementById('dashRepTable').innerHTML=repH||'<div class="empty">No sales yet today</div>';
+
+  // balance submissions
+  let balH='';
+  if(balances.length){
+    balances.forEach(b=>{
+      const sc=b.status==='balanced'?'b-green':b.status==='over'?'b-amber':'b-red';
+      const diffTxt=b.status==='balanced'?'✓ Exact':b.status==='over'?`+${fmt(b.diff)}`:fmt(b.diff);
+      balH+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px">
+        <div><strong style="font-weight:500">${b.uname}</strong><div style="color:var(--text3)">${b.time} · ${b.txCount} sales</div></div>
+        <div style="text-align:right">
+          <div style="font-size:11px;color:var(--text3)">Expected ${fmt(b.expected)} · Handed ${fmt(b.submitted)}</div>
+          <span class="badge ${sc}">${diffTxt}</span>
+        </div>
+      </div>`;
+    });
+  } else {balH='<div class="empty">No balance submissions yet today</div>';}
+  document.getElementById('dashBalTable').innerHTML=balH;
+
+  // all transactions
+  renderSalesTable(allSales,document.getElementById('dashTxTable'),false);
+}
+
+function printAdminDaily(){
+  const sales=loadSales().filter(s=>s.date===today());
+  const rev=sales.reduce((a,s)=>a+s.revenue,0);
+  const cost=sales.reduce((a,s)=>a+s.cost,0);
+  const rows=sales.map(s=>`${s.time}\t${s.id}\t${s.product}\t${s.qty}\t${fmt(s.buy)}\t${fmt(s.sell)}\t${fmt(s.profit)}\t${s.uname}`).join('\n');
+  const rpt=`KARZA TECHNOLOGIES — DAILY REPORT ${today()}\n${'='.repeat(65)}\n${rows}\n${'='.repeat(65)}\nRevenue: ${fmt(rev)}  Cost: ${fmt(cost)}  Profit: ${fmt(rev-cost)}\n`;
+  const w=window.open('','_blank');if(w){w.document.write('<pre style="font:13px monospace;padding:20px;background:#fff;color:#000">'+rpt+'</pre>');w.print();}
 }
 
 // ─── BOOT ──────────────────────────────────────────────────
